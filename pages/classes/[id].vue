@@ -882,4 +882,19 @@ onMounted(async () => {
 :deep(.link-inline){color:var(--teal);text-decoration:underline;text-underline-offset:3px;word-break:break-all}
 .anim-scale{animation:scaleIn .2s ease both}
 @keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+
+@media (max-width:768px){
+  .cd-topbar{padding:0 12px}
+  .topbar-breadcrumb{display:none}
+  .cd-sidebar{display:none}
+  .cd-layout{flex-direction:column}
+  .tabs-bar{padding:0 12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tab-btn{padding:12px 12px;font-size:12px}
+  .tabs-actions{gap:4px}
+  .tab-content{padding:12px}
+  .page-header{padding:14px 12px 12px}
+  .page-title{font-size:20px}
+  .post-sheet{padding:18px 14px 24px;border-radius:var(--r-2xl) var(--r-2xl) 0 0;max-height:92vh}
+  .post-overlay{padding:0;align-items:flex-end}
+}
 </style>

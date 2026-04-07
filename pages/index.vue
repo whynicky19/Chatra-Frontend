@@ -523,4 +523,14 @@ watch(() => auth.user?.id, (newId) => { if (newId) loadJoined() })
 .del-body{display:flex;align-items:flex-start;gap:14px;padding:4px 0 18px}
 .del-icon{width:44px;height:44px;border-radius:var(--r-md);background:var(--red-l);border:1px solid rgba(220,38,38,.2);display:flex;align-items:center;justify-content:center;color:var(--red);flex-shrink:0}
 .del-text{font-size:14px;color:var(--text2);line-height:1.7}
+
+@media (max-width:768px){
+  .content-area{padding:16px 12px 24px}
+  .pg-head{flex-direction:column;gap:12px;margin-bottom:20px}
+  .pg-head-r{width:100%;justify-content:center}
+  .pg-title{font-size:22px}
+  .classes-grid{grid-template-columns:1fr;gap:14px}
+  .card-cover{height:160px}
+  .add-card{min-height:120px}
+}
 </style>

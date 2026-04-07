@@ -3,6 +3,9 @@
     <!-- Header -->
     <div class="cw-head">
       <div class="cw-head-l">
+        <button v-if="props.showBack" class="btn btn-icon btn-ghost back-btn" @click="emit('back')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+        </button>
         <div class="cw-av">
           <img v-if="chatAvatar" :src="chatAvatar" class="cw-av-img"/>
           <div v-else :class="['av','av-sm',colorFor(chatsStore.active?.id||0)]">{{cInit}}</div>
@@ -176,6 +179,9 @@ import { useChatsSvc } from '~/services/chats'
 import { useUsersSvc } from '~/services/users'
 import { useI18n } from '~/composables/useI18n'
 
+const props = defineProps<{ showBack?: boolean }>()
+const emit = defineEmits<{ (e: 'back'): void }>()
+
 const auth = useAuthStore()
 const chatsStore = useChatsStore()
 const { lang } = useI18n()
@@ -338,7 +344,15 @@ watch(() => chatsStore.activeMsgs.length, () => scrollBottom())
 </script>
 <style scoped>
 .cw{display:flex;flex-direction:column;height:100%;background:var(--bg)}
+.back-btn{margin-right:4px;flex-shrink:0}
 .cw-head{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:60px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface)}
+@media (max-width:768px){
+  .cw-head{padding:0 12px}
+  .cw-head-r{gap:2px}
+  .inp-row{padding:8px 12px;gap:8px}
+  .cw-name{font-size:14px}
+  .cw-role{display:none}
+}
 .cw-head-l{display:flex;align-items:center;gap:12px}
 .cw-av{flex-shrink:0;position:relative}
 .cw-av-img{width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid rgba(0,177,201,.2)}

@@ -202,4 +202,12 @@ onMounted(() => {
 .deactivate-sub{font-size:13px;color:var(--text4);margin-top:2px}
 .deactivate-btn{color:var(--red);font-size:14px;font-weight:600;background:none;border:none;cursor:pointer;flex-shrink:0}
 .deactivate-btn:hover{opacity:.7}
+@media (max-width:768px){
+  .pg-body{padding:12px 12px 24px;gap:14px}
+  .scard{padding:16px}
+  .scard-head{flex-direction:column;gap:12px;margin-bottom:16px}
+  .scard-head .btn-lg{width:100%}
+  .profile-form{flex-direction:column;align-items:center;gap:16px}
+  .fields-grid{grid-template-columns:1fr;gap:12px}
+}
 </style>

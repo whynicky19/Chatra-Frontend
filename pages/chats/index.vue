@@ -1,5 +1,5 @@
 <template>
-  <div class="chats-layout">
+  <div :class="['chats-layout', isMobile && chatsStore.active ? 'mobile-chat' : isMobile ? 'mobile-list' : '']">
     <!-- Chat list panel -->
     <div class="chat-list-panel">
       <div class="clp-head">
@@ -68,7 +68,7 @@
     <!-- Main chat area -->
     <div class="chat-main">
       <Transition name="chat-switch" mode="out-in">
-        <ChatWindow v-if="chatsStore.active" :key="chatsStore.active.id"/>
+        <ChatWindow v-if="chatsStore.active" :key="chatsStore.active.id" :show-back="isMobile" @back="mobileBack"/>
         <div v-else class="no-chat" key="empty">
           <div class="no-chat-icon">💬</div>
           <div class="no-chat-title">{{ t('chats.select') }}</div>
@@ -97,7 +97,7 @@
   </div>
 </template>
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '~/stores/auth.store'
 import { useChatsStore } from '~/stores/chats.store'
 import { useToast } from '~/composables/useToast'
@@ -110,6 +110,9 @@ const auth=useAuthStore();const chatsStore=useChatsStore();const chatsSvc=useCha
 const { t } = useI18n()
 const searchQ=ref('');const sResults=ref<any[]>([]);const sLoading=ref(false);const showNew=ref(false);const newName=ref('');const creating=ref(false)
 let timer:any=null
+const isMobile=ref(false)
+const mobileBack=()=>{chatsStore.setActive(null)}
+let _resizeHandler:()=>void
 const nickReg=():Record<string,string>=>{try{return JSON.parse(localStorage.getItem('_nick_registry')||'{}')}catch{return{}}}
 const avatarReg=():Record<string,string>=>{try{return JSON.parse(localStorage.getItem('_avatar_registry')||'{}')}catch{return{}}}
 const getAvatar=(uid:number):string=>uid===auth.user?.id&&auth.avatar?auth.avatar:(avatarReg()[uid]||'')
@@ -126,7 +129,13 @@ const clearSearch=()=>{searchQ.value='';sResults.value=[]}
 const openDM=async(user:any)=>{const exist=chatsStore.chats.find(c=>{const us=chatsStore.chatUsers[c.id]||[];return us.length===2&&us.some((u:any)=>u.id===user.id)&&us.some((u:any)=>u.id===auth.user?.id)});if(exist){chatsStore.setActive(exist);chatsStore.markRead(exist.id);clearSearch();return};try{const c=await chatsSvc.create(`Чат с ${user.email}`);await chatsSvc.addUser(c.id,user.id);connectWs(c.id);await loadUsers(c.id);chatsStore.addChat(c);chatsStore.setActive(c);clearSearch();toast.ok(t('chats.created'))}catch{toast.err(t('chats.error'))}}
 const selectChat=(c:any)=>{chatsStore.setActive(c);chatsStore.markRead(c.id)}
 const createGroup=async()=>{if(!newName.value.trim())return;creating.value=true;try{const c=await chatsSvc.create(newName.value.trim());chatsStore.addChat(c);chatsStore.setActive(c);connectWs(c.id);showNew.value=false;newName.value='';toast.ok(t('chats.created'))}catch{toast.err(t('chats.error'))}finally{creating.value=false}}
-onMounted(async()=>{if(!chatsStore.chats.length){chatsStore.loadingChats=true;try{const c=await chatsSvc.list();chatsStore.setChats(c);await Promise.all(c.map(async(ch:any)=>{connectWs(ch.id);await loadUsers(ch.id)}))}catch{toast.err(t('chats.error'))}finally{chatsStore.loadingChats=false}}else{chatsStore.chats.forEach((ch:any)=>{if(!chatsStore.chatUsers[ch.id]?.length)loadUsers(ch.id)})};startChatPoller()})
+onMounted(async()=>{
+  _resizeHandler=()=>{isMobile.value=window.innerWidth<=768}
+  _resizeHandler()
+  window.addEventListener('resize',_resizeHandler)
+  if(!chatsStore.chats.length){chatsStore.loadingChats=true;try{const c=await chatsSvc.list();chatsStore.setChats(c);await Promise.all(c.map(async(ch:any)=>{connectWs(ch.id);await loadUsers(ch.id)}))}catch{toast.err(t('chats.error'))}finally{chatsStore.loadingChats=false}}else{chatsStore.chats.forEach((ch:any)=>{if(!chatsStore.chatUsers[ch.id]?.length)loadUsers(ch.id)})};startChatPoller()
+})
+onUnmounted(()=>{if(import.meta.client)window.removeEventListener('resize',_resizeHandler)})
 </script>
 <style scoped>
 .chats-layout{display:flex;height:100%;overflow:hidden}
@@ -171,4 +180,13 @@ onMounted(async()=>{if(!chatsStore.chats.length){chatsStore.loadingChats=true;tr
 .chat-switch-enter-from{opacity:0;transform:translateX(12px)}
 .chat-switch-leave-to{opacity:0;transform:translateX(-6px)}
 .bg-b0{background:linear-gradient(135deg,#00B1C9,#007a8e)}.bg-b1{background:linear-gradient(135deg,#009aaf,#006a80)}.bg-b2{background:linear-gradient(135deg,#00c4de,#009aaf)}.bg-b3{background:linear-gradient(135deg,#0891b2,#0e7490)}.bg-b4{background:linear-gradient(135deg,#06b6d4,#0891b2)}.bg-b5{background:linear-gradient(135deg,#22d3ee,#06b6d4)}
+@media (max-width:768px){
+  .chats-layout{position:relative}
+  .mobile-list .chat-list-panel{width:100%;border-right:none}
+  .mobile-list .chat-main{display:none}
+  .mobile-chat .chat-list-panel{display:none}
+  .mobile-chat .chat-main{display:flex;width:100%}
+  .clp-head{padding:14px 12px 8px}
+  .chat-item{margin:1px 4px}
+}
 </style>

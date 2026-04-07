@@ -25,7 +25,7 @@
         <div class="item-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
         </div>
-        <span class="item-label" v-if="!isCollapsed">{{ t('nav.classes') }}</span>
+        <span class="item-label" v-if="!isCollapsed && !isMobile">{{ t('nav.classes') }}</span>
       </NuxtLink>
 
       <NuxtLink to="/chats" class="sb-item" :class="{active:route.path==='/chats'||route.path.startsWith('/chats')}">
@@ -33,29 +33,29 @@
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
           <span v-if="totalUnread>0" class="notif-dot">{{totalUnread>9?'9+':totalUnread}}</span>
         </div>
-        <span class="item-label" v-if="!isCollapsed">{{ t('nav.chats') }}</span>
-        <span v-if="!isCollapsed && totalUnread>0" class="notif-pill">{{totalUnread>99?'99+':totalUnread}}</span>
+        <span class="item-label" v-if="!isCollapsed && !isMobile">{{ t('nav.chats') }}</span>
+        <span v-if="!isCollapsed && !isMobile && totalUnread>0" class="notif-pill">{{totalUnread>99?'99+':totalUnread}}</span>
       </NuxtLink>
 
       <NuxtLink v-if="auth.isAdmin" to="/admin" class="sb-item" :class="{active:route.path==='/admin'}">
         <div class="item-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
         </div>
-        <span class="item-label" v-if="!isCollapsed">{{ t('nav.participants') }}</span>
+        <span class="item-label" v-if="!isCollapsed && !isMobile">{{ t('nav.participants') }}</span>
       </NuxtLink>
 
       <NuxtLink to="/ai" class="sb-item" :class="{active:route.path==='/ai'}">
         <div class="item-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         </div>
-        <span class="item-label" v-if="!isCollapsed">{{ t('nav.ai') }}</span>
+        <span class="item-label" v-if="!isCollapsed && !isMobile">{{ t('nav.ai') }}</span>
       </NuxtLink>
 
       <NuxtLink to="/settings" class="sb-item" :class="{active:route.path==='/settings'}">
         <div class="item-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         </div>
-        <span class="item-label" v-if="!isCollapsed">{{ t('nav.settings') }}</span>
+        <span class="item-label" v-if="!isCollapsed && !isMobile">{{ t('nav.settings') }}</span>
       </NuxtLink>
     </nav>
 
@@ -64,13 +64,13 @@
         <div class="item-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
-        <span class="item-label" v-if="!isCollapsed">{{ t('chats.help_center') }}</span>
+        <span class="item-label" v-if="!isCollapsed && !isMobile">{{ t('chats.help_center') }}</span>
       </a>
       <div class="sb-item logout-item" @click="doLogout" :title="t('nav.logout')">
         <div class="item-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
         </div>
-        <span class="item-label" v-if="!isCollapsed">{{ t('nav.logout') }}</span>
+        <span class="item-label" v-if="!isCollapsed && !isMobile">{{ t('nav.logout') }}</span>
       </div>
     </div>
   </aside>
@@ -88,6 +88,7 @@ const totalUnread = computed(() => chatsStore.totalUnread)
 const doLogout = () => { chatsStore.disconnectAll(); logout() }
 
 const isCollapsed = ref(false)
+const isMobile = ref(false)
 const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
   if (import.meta.client) localStorage.setItem('_sidebar_collapsed', isCollapsed.value ? '1' : '0')
@@ -95,6 +96,9 @@ const toggleSidebar = () => {
 onMounted(() => {
   if (import.meta.client) {
     isCollapsed.value = localStorage.getItem('_sidebar_collapsed') === '1'
+    const check = () => { isMobile.value = window.innerWidth <= 768 }
+    check()
+    window.addEventListener('resize', check)
   }
 })
 </script>
@@ -124,4 +128,56 @@ onMounted(() => {
 .help-item{color:var(--text4)}
 .logout-item{color:var(--text4)}
 .logout-item:hover{background:var(--red-l)!important;color:var(--red)!important}
+
+@media (max-width:768px){
+  .sb{
+    position:fixed!important;
+    bottom:0;left:0;right:0;top:auto!important;
+    width:100%!important;
+    height:60px;
+    flex-direction:row;
+    border-right:none;
+    border-top:1px solid var(--border);
+    z-index:100;
+    overflow:visible;
+  }
+  .sb.collapsed{width:100%!important}
+  .sb-logo{display:none}
+  .lang-switch{display:none}
+  .sb-nav{
+    flex-direction:row;
+    flex:1;
+    padding:0;
+    gap:0;
+    overflow:visible;
+    align-items:stretch;
+    justify-content:space-around;
+  }
+  .sb-item{
+    flex-direction:column;
+    padding:6px 4px 4px;
+    gap:2px;
+    border-radius:0;
+    justify-content:center;
+    align-items:center;
+    flex:1;
+    min-width:44px;
+    white-space:nowrap;
+  }
+  .sb-item.active{background:transparent;border-left:none}
+  .sb-item.active .item-icon{color:var(--teal)}
+  .sb-item.active .item-icon svg{stroke:var(--teal)}
+  .item-icon{width:22px;height:22px}
+  .notif-pill{display:none}
+  .sb-bottom{
+    flex-direction:row;
+    border-top:none;
+    padding:0;
+    gap:0;
+  }
+  .sb-bottom .sb-item{flex:1}
+  .help-item{display:none}
+  .collapsed .sb-item{justify-content:center;padding:6px 4px 4px}
+  .collapsed .sb-logo{display:none}
+}
 </style>
