@@ -23,10 +23,10 @@
       <!-- Tabs -->
       <div class="am-tabs">
         <button :class="['am-tab', { active: tab === 'info' }]" @click="tab = 'info'">Задание</button>
-        <button v-if="isTeacher" :class="['am-tab', { active: tab === 'submissions' }]" @click="tab = 'submissions'; loadSubs()">
+        <button v-if="canSeeSubmissions" :class="['am-tab', { active: tab === 'submissions' }]" @click="tab = 'submissions'; loadSubs()">
           Работы <span v-if="submissions.length" class="tab-count">{{ submissions.length }}</span>
         </button>
-        <button v-if="!isTeacher" :class="['am-tab', { active: tab === 'submit' }]" @click="tab = 'submit'">
+        <button v-if="!canSeeSubmissions" :class="['am-tab', { active: tab === 'submit' }]" @click="tab = 'submit'">
           {{ mySubmission ? 'Моя работа' : 'Сдать' }}
         </button>
       </div>
@@ -45,7 +45,7 @@
           </div>
         </div>
 
-        <div v-if="isTeacher" class="section">
+        <div v-if="canSeeSubmissions" class="section">
           <div class="section-label">Критерии оценивания</div>
           <div class="criteria-list">
             <div v-for="c in parsedCriteria" :key="c.name" class="criterion">
@@ -61,7 +61,7 @@
       </div>
 
       <!-- ═══ SUBMIT TAB (student) ═══ -->
-      <div v-if="tab === 'submit' && !isTeacher" class="am-body">
+      <div v-if="tab === 'submit' && !canSeeSubmissions" class="am-body">
 
         <!-- Already submitted -->
         <div v-if="mySubmission" class="submitted-panel">
@@ -197,7 +197,7 @@
       </div>
 
       <!-- ═══ SUBMISSIONS TAB (teacher) ═══ -->
-      <div v-if="tab === 'submissions' && isTeacher" class="am-body">
+      <div v-if="tab === 'submissions' && canSeeSubmissions" class="am-body">
         <div v-if="loadingSubs" class="load-center"><div class="spinner" style="width:24px;height:24px;border-width:3px;border-color:var(--border2);border-top-color:var(--teal)"></div></div>
 
         <!-- Detail view -->
@@ -305,10 +305,14 @@ import { useAssignmentsSvc } from '~/services/assignments'
 import { useUploadSvc } from '~/services/uploads'
 import { useUsersSvc } from '~/services/users'
 import { useToast } from '~/composables/useToast'
+import { useAuthStore } from '~/stores/auth.store'
 import type { Assignment, Submission, Variant } from '~/services/assignments'
 
 const props = defineProps<{ assignment: Assignment; isTeacher?: boolean }>()
 const emit = defineEmits(['close', 'submitted'])
+
+const auth = useAuthStore()
+const canSeeSubmissions = computed(() => props.isTeacher || auth.isTeacher)
 
 const svc = useAssignmentsSvc()
 const uploadSvc = useUploadSvc()
@@ -411,11 +415,12 @@ const loadSubs = async () => {
       usersSvc.all()
     ])
     submissions.value = subs
-    // Build map: user_id → ФИО (from localStorage registry) or email fallback
+    // Build map: user_id → ФИО (from localStorage registries) or email fallback
     const fnReg: Record<number, string> = JSON.parse(localStorage.getItem('_fullname_registry') || '{}')
+    const nickReg: Record<number, string> = JSON.parse(localStorage.getItem('_nick_registry') || '{}')
     const map: Record<number, string> = {}
     for (const u of users) {
-      map[u.id] = fnReg[u.id] || u.full_name || u.fullname || u.name || u.email || `Студент #${u.id}`
+      map[u.id] = fnReg[u.id] || nickReg[u.id] || u.full_name || u.fullname || u.name || u.email || `Студент #${u.id}`
     }
     studentMap.value = map
   }
@@ -487,7 +492,7 @@ onMounted(async () => {
     assignmentVariants.value = await svc.listVariants(props.assignment.id)
   } catch {}
 
-  if (!props.isTeacher) {
+  if (!canSeeSubmissions.value) {
     try {
       const subs = await svc.mySubmissions()
       mySubmission.value = subs.find(s => s.assignment_id === props.assignment.id) ?? null

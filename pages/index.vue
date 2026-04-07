@@ -405,7 +405,7 @@ const copyClassCode = (id: number) => {
   const code = codeFor(id)
   navigator.clipboard?.writeText(code).then(() => toast.ok(`Код скопирован: ${code}`)).catch(() => toast.ok(`Код: ${code}`))
 }
-const onCreated = async () => { showCreate.value=false; await load() }
+const onCreated = async (cls: any) => { showCreate.value=false; await load(); if (cls?.id && !joinedIds.value.includes(cls.id)) { joinedIds.value.push(cls.id); saveJoined() } }
 const load = async () => { loading.value=true; try { allPosts.value=await postsSvc.list() } catch { toast.err(t('general.error')) } finally { loading.value=false } }
 onMounted(()=>{ loadJoined(); load() })
 
