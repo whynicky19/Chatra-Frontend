@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+node_modules/
+
+# Nuxt build output
+frontend_work/.nuxt/
+frontend_work/.output/
+frontend_work/.cache/
+
+# Generated files
+frontend_work/.nitro/
+frontend_work/dist/
+
+# Env files
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Nuxt prepare
+frontend_work/.nuxt

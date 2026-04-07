@@ -1,0 +1,49 @@
+<template>
+  <div class="shell">
+    <AppSidebar />
+    <main class="shell-main"><slot /></main>
+    <ToastContainer />
+  </div>
+</template>
+<script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
+import { useAuth } from '~/composables/useAuth'
+import { useAuthStore } from '~/stores/auth.store'
+import { useChat } from '~/composables/useChat'
+import { useChatsStore } from '~/stores/chats.store'
+import { useChatsSvc } from '~/services/chats'
+
+const { fetchMe } = useAuth()
+const auth = useAuthStore()
+const chatsStore = useChatsStore()
+const chatsSvc = useChatsSvc()
+const { connectWs, startChatPoller } = useChat()
+
+onMounted(async () => {
+  if (auth.token && !auth.user) await fetchMe()
+
+  // Load all chats and connect WS to each — critical for receiving DMs
+  if (auth.token) {
+    try {
+      const chats = await chatsSvc.list()
+      chatsStore.setChats(chats)
+      // Connect WS to ALL chats so messages arrive even when chat is not active
+      chats.forEach((c: any) => connectWs(c.id))
+    } catch {}
+
+    // Start polling for new chats (DMs from other users)
+    startChatPoller()
+  }
+})
+
+onUnmounted(() => {
+  if (import.meta.client && (window as any).__chatPollInterval) {
+    clearInterval((window as any).__chatPollInterval)
+    delete (window as any).__chatPollInterval
+  }
+})
+</script>
+<style scoped>
+.shell{display:flex;height:100vh;overflow:hidden;background:var(--bg)}
+.shell-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+</style>
