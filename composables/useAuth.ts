@@ -2,6 +2,7 @@ import { navigateTo } from '#app'
 import { useAuthStore } from '~/stores/auth.store'
 import { useToast } from '~/composables/useToast'
 import { useAuthSvc } from '~/services/auth'
+import { resetLogoutFlag } from '~/services/api'
 
 export const useAuth = () => {
   const auth = useAuthStore()
@@ -10,6 +11,7 @@ export const useAuth = () => {
 
   const login = async (email: string, pw: string) => {
     try {
+      resetLogoutFlag()
       const t = await svc.login(email, pw)
       auth.setToken(t.access_token)
       const u = await svc.me()

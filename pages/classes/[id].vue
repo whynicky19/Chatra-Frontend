@@ -10,7 +10,6 @@
       <!-- ══ Topbar — simplified ══ -->
       <div class="cd-topbar">
         <div class="cd-topbar-left">
-          <div class="topbar-logo"><img src="/logo.png" class="topbar-logo-img" alt="Chatra"/></div>
           <div class="topbar-breadcrumb">
             <NuxtLink to="/" class="bc-link">{{ t('nav.classes') }}</NuxtLink>
             <span class="bc-sep">›</span>

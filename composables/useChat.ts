@@ -31,6 +31,13 @@ export const useChat = () => {
   const startChatPoller = () => {
     if (!import.meta.client) return
     const poll = async () => {
+      if (!auth.token) {
+        if ((window as any).__chatPollInterval) {
+          clearInterval((window as any).__chatPollInterval)
+          delete (window as any).__chatPollInterval
+        }
+        return
+      }
       try {
         const chats = await chatSvc.list()
         chats.forEach((c: any) => {
