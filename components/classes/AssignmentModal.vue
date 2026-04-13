@@ -415,12 +415,12 @@ const loadSubs = async () => {
       usersSvc.all()
     ])
     submissions.value = subs
-    // Build map: user_id → ФИО (from localStorage registries) or email fallback
+    // Build map: user_id → ФИО from server, fallback to localStorage or email
     const fnReg: Record<number, string> = JSON.parse(localStorage.getItem('_fullname_registry') || '{}')
     const nickReg: Record<number, string> = JSON.parse(localStorage.getItem('_nick_registry') || '{}')
     const map: Record<number, string> = {}
     for (const u of users) {
-      map[u.id] = fnReg[u.id] || nickReg[u.id] || u.full_name || u.fullname || u.name || u.email || `Студент #${u.id}`
+      map[u.id] = u.full_name || fnReg[u.id] || nickReg[u.id] || u.name || u.email || `Студент #${u.id}`
     }
     studentMap.value = map
   }

@@ -41,6 +41,8 @@ export interface Submission {
   id: number
   assignment_id: number
   student_id: number
+  student_name?: string   // returned by backend if supported
+  student_email?: string  // returned by backend if supported
   file_url?: string
   file_urls?: string   // JSON string of URL list
   text_content?: string

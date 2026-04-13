@@ -8,16 +8,7 @@
         <input v-model="fullname" class="input" placeholder="Иванов Иван Иванович" maxlength="80"/>
         <div v-if="fullname && fullname.trim().split(' ').filter(Boolean).length < 2" class="nick-hint err">Введите фамилию и имя</div>
       </div>
-      <div class="frow">
-        <label class="flabel">Никнейм <span style="color:var(--red)">*</span></label>
-        <input v-model="nick" class="input" placeholder="Ваш ник (например: ivan123)" @input="onNickInput" maxlength="32"/>
-        <div v-if="nick" :class="['nick-hint', nickOk===true?'ok':nickOk===false?'err':'']">
-          <span v-if="nickChecking">⏳ Проверка...</span>
-          <span v-else-if="nick.length<3">Минимум 3 символа</span>
-          <span v-else-if="nickOk===false">✕ Уже занят</span>
-          <span v-else-if="nickOk===true">✓ Доступен</span>
-        </div>
-      </div>
+
       <div class="frow">
         <label class="flabel">Email</label>
         <input v-model="email" type="email" class="input" placeholder="you@example.com" @input="onEmailInput" @blur="emailTouched=true"/>
@@ -66,16 +57,13 @@ const toast = useToast()
 const { t } = useI18n()
 
 const nick = ref(''); const fullname = ref(''); const email = ref(''); const pw = ref(''); const role = ref('student'); const loading = ref(false)
-const nickOk = ref<boolean|null>(null); const nickChecking = ref(false)
 const emailTouched = ref(false)
 const emailOk = computed(() => /^[^\s@]+@(gmail\.com|icloud\.com)$/.test(email.value.trim()))
 const onEmailInput = () => { emailTouched.value = true }
-// New: gesture verification state — user must pass ✌️ check before submitting
 const gestureVerified = ref(false)
-let nickTimer: any = null
 
 const fullnameOk = computed(() => fullname.value.trim().split(' ').filter(Boolean).length >= 2)
-const canSubmit = computed(() => fullnameOk.value && emailOk.value && pw.value.length>=6 && nick.value.length>=3 && nickOk.value!==false)
+const canSubmit = computed(() => fullnameOk.value && emailOk.value && pw.value.length>=6)
 
 const pwScore = computed(() => {
   const p = pw.value; if (!p) return 0; let s = 0
@@ -87,26 +75,11 @@ const score = computed(() => pwScore.value)
 const scoreColor = computed(() => score.value<=40?'var(--red)':score.value<=60?'var(--yellow)':'var(--green)')
 const scoreLabel = computed(() => score.value<=40?'Слабый':score.value<=60?'Средний':'Надёжный')
 
-const onNickInput = () => {
-  nickOk.value = null; clearTimeout(nickTimer)
-  const v = nick.value.trim()
-  if (v.length < 3) return
-  nickChecking.value = true
-  nickTimer = setTimeout(() => {
-    const reg = JSON.parse(localStorage.getItem('_nick_registry')||'{}')
-    const taken = Object.values(reg).some((n: any) => n.toLowerCase()===v.toLowerCase())
-    nickOk.value = !taken
-    nickChecking.value = false
-  }, 400)
-}
-
 const sub = async () => {
   if (!canSubmit.value) return
   loading.value = true
-  const ok = await register(email.value, pw.value, role.value)
+  const ok = await register(email.value, pw.value, role.value, fullname.value.trim())
   if (ok) {
-    // Save nick and fullname as pending — will be applied after login
-    localStorage.setItem('_pending_nick', nick.value)
     localStorage.setItem('_pending_fullname', fullname.value.trim())
     await navigateTo('/login')
   }

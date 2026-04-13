@@ -17,17 +17,23 @@ export const useAuth = () => {
       const u = await svc.me()
       auth.setUser(u) // loads per-user avatar + nick inside setUser
 
-      // Apply pending nick from registration (stored before we knew the user ID)
+      // Sync full_name from server if present
       if (import.meta.client) {
+        if (u.full_name) {
+          auth.setFullname(u.full_name)
+          localStorage.removeItem('_pending_fullname')
+        } else {
+          // fallback: apply pending full_name saved during registration
+          const pendingFn = localStorage.getItem('_pending_fullname')
+          if (pendingFn) {
+            auth.setFullname(pendingFn)
+            localStorage.removeItem('_pending_fullname')
+          }
+        }
         const pending = localStorage.getItem('_pending_nick')
         if (pending) {
           auth.setNickname(pending)
           localStorage.removeItem('_pending_nick')
-        }
-        const pendingFn = localStorage.getItem('_pending_fullname')
-        if (pendingFn) {
-          auth.setFullname(pendingFn)
-          localStorage.removeItem('_pending_fullname')
         }
       }
       return true
@@ -37,9 +43,9 @@ export const useAuth = () => {
     }
   }
 
-  const register = async (email: string, pw: string, role = 'employee') => {
+  const register = async (email: string, pw: string, role = 'employee', full_name?: string) => {
     try {
-      await svc.register(email, pw, role)
+      await svc.register(email, pw, role, full_name)
       toast.ok('Аккаунт создан')
       return true
     } catch (e: any) {

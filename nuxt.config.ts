@@ -1,3 +1,5 @@
+import { fileURLToPath } from 'node:url'
+
 export default defineNuxtConfig({
   devtools: { enabled: false },
   compatibilityDate: '2024-04-03',
@@ -25,4 +27,14 @@ export default defineNuxtConfig({
     pageTransition: { name: 'page', mode: 'out-in' },
   },
   typescript: { strict: false, typeCheck: false },
+  vite: {
+    resolve: {
+      alias: {
+        '#app-manifest': fileURLToPath(new URL('./.nuxt/manifest/meta/dev.json', import.meta.url)),
+      },
+    },
+    optimizeDeps: {
+      exclude: ['#app-manifest'],
+    },
+  },
 })

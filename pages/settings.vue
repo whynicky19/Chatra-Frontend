@@ -27,12 +27,8 @@
           <div class="fields-grid">
             <div class="field-group">
               <label class="field-label">{{ t('settings.full_name') }}</label>
-              <input v-model="nickInput" class="input field-input" :placeholder="t('settings.nick_placeholder')" @input="onNickInput" maxlength="32"/>
-              <div v-if="nickInput" :class="['nick-hint', nickOk===true?'ok':nickOk===false?'err':'']">
-                <span v-if="nickChecking">⏳</span>
-                <span v-else-if="nickOk===true">{{ t('settings.nick_ok') }}</span>
-                <span v-else-if="nickOk===false">{{ t('settings.nick_err') }}</span>
-              </div>
+              <input v-model="fullnameInput" class="input field-input" placeholder="Иванов Иван Иванович" maxlength="80"/>
+              <div v-if="fullnameInput && fullnameInput.trim().split(' ').filter(Boolean).length < 2" class="nick-hint err">Введите фамилию и имя</div>
             </div>
             <div class="field-group">
               <label class="field-label">{{ t('settings.email') }}</label>
@@ -101,15 +97,16 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth.store'
+import { useAuthSvc } from '~/services/auth'
 import { useToast } from '~/composables/useToast'
 import { useI18n } from '~/composables/useI18n'
 definePageMeta({ layout: 'default' })
-const auth = useAuthStore(); const toast = useToast(); const { t, lang } = useI18n()
-const nickInput = ref(''); const nickOk = ref<boolean|null>(null); const nickChecking = ref(false)
+const auth = useAuthStore(); const authSvc = useAuthSvc(); const toast = useToast(); const { t, lang } = useI18n()
+const fullnameInput = ref(''); const nickOk = ref<boolean|null>(null); const nickChecking = ref(false)
 const emailNotif = ref(true); const aiInsights = ref(true); const desktopPopups = ref(false)
 const isDark = ref(false); const followSystem = ref(false)
 
-const uInit = computed(() => (auth.nickname || auth.user?.email || '?')[0]?.toUpperCase())
+const uInit = computed(() => (auth.fullname || auth.nickname || auth.user?.email || '?')[0]?.toUpperCase())
 const roleLabel = computed(() => {
   const role = auth.user?.role
   if (role === 'admin') return t('settings.admin')
@@ -117,21 +114,11 @@ const roleLabel = computed(() => {
   return t('settings.student')
 })
 
-let nt: any = null
-const onNickInput = () => {
-  nickOk.value = null; clearTimeout(nt)
-  if (nickInput.value.length < 3) return
-  nickChecking.value = true
-  nt = setTimeout(() => {
-    const reg = JSON.parse(localStorage.getItem('_nick_registry') || '{}')
-    nickOk.value = !Object.entries(reg).some(([uid, n]) => (n as string).toLowerCase() === nickInput.value.toLowerCase() && Number(uid) !== auth.user?.id)
-    nickChecking.value = false
-  }, 400)
-}
-const saveProfile = () => {
-  if (nickInput.value) {
-    if (nickOk.value === false) { toast.err(t('settings.nick_check')); return }
-    auth.setNickname(nickInput.value)
+const saveProfile = async () => {
+  const fn = fullnameInput.value.trim()
+  if (fn) {
+    auth.setFullname(fn)
+    try { await authSvc.updateMe(fn) } catch {}
   }
   toast.ok(t('settings.nick_saved'))
 }
@@ -150,7 +137,7 @@ onMounted(() => {
   const theme = localStorage.getItem('theme')
   isDark.value = theme === 'dark'
   if (isDark.value) document.documentElement.classList.add('dark')
-  nickInput.value = auth.nickname || ''
+  fullnameInput.value = auth.fullname || auth.nickname || ''
   emailNotif.value = localStorage.getItem('emailNotif') !== '0'
   aiInsights.value = localStorage.getItem('aiInsights') !== '0'
   desktopPopups.value = localStorage.getItem('desktopPopups') === '1'
@@ -169,10 +156,10 @@ onMounted(() => {
 .scard-sub{font-size:13px;color:var(--text4)}
 .scard-h3{font-size:16px;font-weight:700;color:var(--text1)}
 .profile-form{display:flex;gap:28px;align-items:flex-start}
-.avatar-upload-area{position:relative;display:block;cursor:pointer;width:90px;height:110px;flex-shrink:0}
-.prof-av{width:90px;height:110px;border-radius:var(--r-lg);object-fit:cover;border:2px solid var(--border)}
-.prof-av-init{width:90px;height:110px;border-radius:var(--r-lg);background:linear-gradient(135deg,#00B1C9,#007a8e);color:#fff;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800}
-.av-overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);border-radius:var(--r-lg);opacity:0;display:flex;align-items:center;justify-content:center;transition:opacity .2s}
+.avatar-upload-area{position:relative;display:block;cursor:pointer;width:90px;height:90px;flex-shrink:0}
+.prof-av{width:90px;height:90px;border-radius:var(--r-md);object-fit:cover;border:2px solid var(--border)}
+.prof-av-init{width:90px;height:90px;border-radius:var(--r-md);background:linear-gradient(135deg,#00B1C9,#007a8e);color:#fff;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800}
+.av-overlay{position:absolute;inset:0;background:rgba(0,0,0,.4);border-radius:var(--r-md);opacity:0;display:flex;align-items:center;justify-content:center;transition:opacity .2s}
 .avatar-upload-area:hover .av-overlay{opacity:1}
 .fields-grid{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .field-group{display:flex;flex-direction:column;gap:6px}
