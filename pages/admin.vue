@@ -320,4 +320,25 @@ onMounted(async () => {
 .ai-pagination{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{animation:spin .7s linear infinite}
+
+@media (max-width:768px) {
+  .pg-head { padding: 16px 14px 0; }
+  .pg-body { padding: 14px 14px 24px; }
+  .stats-row { grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+  .stat-card { padding: 12px 8px; flex-direction: column; align-items: flex-start; gap: 6px; }
+  .stat-val { font-size: 18px; }
+  .stat-lbl { font-size: 11px; }
+  .users-table { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .users-table table { min-width: 500px; }
+  .pg-title { font-size: 17px; }
+  .ai-summary-row { gap: 8px; }
+  .ai-sum-card { min-width: 110px; padding: 10px 12px; }
+  .ai-filter-row { flex-wrap: wrap; gap: 8px; }
+  .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; white-space: nowrap; }
+}
+@media (max-width:480px) {
+  .stats-row { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .stat-card { padding: 10px 6px; }
+  .stat-val { font-size: 16px; }
+}
 </style>

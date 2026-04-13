@@ -123,4 +123,14 @@ const submit = async () => {
 .no-crit { font-size: 12px; color: var(--text4); padding: 8px 0; }
 .btn-add-crit { font-size: 12px; font-weight: 600; color: var(--purple, #00B1C9); background: rgba(0,177,201,.08); border: 1px solid rgba(0,177,201,.2); border-radius: 6px; padding: 4px 10px; cursor: pointer; transition: all .15s; }
 .btn-add-crit:hover { background: rgba(0,177,201,.15); }
+
+@media (max-width:768px) {
+  .cover-upload { height: 110px; }
+  .crit-row { grid-template-columns: 20px 1fr 64px 22px; gap: 4px; }
+  .input-sm { font-size: 16px; }
+  .btn-add-crit { min-height: 44px; padding: 6px 14px; }
+}
+@media (max-width:480px) {
+  .crit-row { grid-template-columns: 18px 1fr 56px 20px; gap: 3px; }
+}
 </style>

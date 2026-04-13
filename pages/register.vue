@@ -105,4 +105,16 @@ const sub = async () => {
 /* Gesture verification box */
 .gesture-box{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px}
 .gesture-done{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--green-l);border:1px solid var(--green);border-radius:var(--r-md);font-size:13px;font-weight:600;color:var(--green)}
+
+@media (max-width:768px) {
+  .auth-card { padding: 24px 16px 28px; border-radius: var(--r-xl); max-width: 100%; }
+  .auth-title { font-size: 18px; }
+  .input { font-size: 16px !important; }
+  .btn-lg { min-height: 48px; }
+  .role-grid { gap: 6px; }
+  .role-btn { padding: 10px 6px; font-size: 12px; }
+}
+@media (max-width:480px) {
+  .auth-card { padding: 20px 12px 24px; }
+}
 </style>

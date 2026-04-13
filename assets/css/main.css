@@ -207,8 +207,10 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Outfit', sans-serif; }
 /* ====== MOBILE ====== */
 @media (max-width: 768px) {
   html { font-size: 14px; }
+  body { overflow-x: hidden; }
+  #__nuxt { overflow-x: hidden; }
 
-  /* Full-screen modal on mobile */
+  /* Full-screen modal on mobile — bottom sheet */
   .overlay { padding: 0; align-items: flex-end; }
   .modal {
     border-radius: var(--r-2xl) var(--r-2xl) 0 0;
@@ -218,10 +220,14 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Outfit', sans-serif; }
     padding: 20px 16px 32px;
   }
 
-  /* Larger touch targets */
-  .btn { min-height: 40px; }
-  .btn-sm { min-height: 34px; }
-  .input { padding: 12px 14px; }
+  /* Larger touch targets — min 44×44px */
+  .btn { min-height: 44px; }
+  .btn-sm { min-height: 36px; padding: 6px 12px; }
+  .btn-icon { min-height: 44px; min-width: 44px; }
+
+  /* Prevent iOS zoom on input focus */
+  .input { padding: 12px 14px; font-size: 16px !important; }
+  input, textarea, select { font-size: 16px; }
 
   /* Cards full-width */
   .scard { border-radius: var(--r-lg); }
@@ -229,4 +235,9 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Outfit', sans-serif; }
   /* Tabs scroll horizontally */
   .tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
   .tab-btn { flex-shrink: 0; }
+}
+
+@media (max-width: 480px) {
+  .modal { padding: 16px 12px 28px; }
+  .btn-lg { font-size: 15px; }
 }

@@ -525,12 +525,27 @@ watch(() => auth.user?.id, (newId) => { if (newId) loadJoined() })
 .del-text{font-size:14px;color:var(--text2);line-height:1.7}
 
 @media (max-width:768px){
-  .content-area{padding:16px 12px 24px}
-  .pg-head{flex-direction:column;gap:12px;margin-bottom:20px}
-  .pg-head-r{width:100%;justify-content:center}
-  .pg-title{font-size:22px}
+  .pg { overflow-x: hidden; }
+  .content-area{padding:16px 12px 80px}
+  .pg-head{flex-direction:column;align-items:flex-start;gap:12px;margin-bottom:20px}
+  .pg-head-left{width:100%}
+  .pg-head-r{width:100%;justify-content:flex-start;flex-wrap:wrap;gap:8px}
+  .pg-title{font-size:22px;text-align:left}
+  .pg-sub{text-align:left;margin:0}
+  .btn-outline-teal{min-height:44px}
   .classes-grid{grid-template-columns:1fr;gap:14px}
   .card-cover{height:160px}
   .add-card{min-height:120px}
+  .add-card-inner{padding:24px 16px}
+  .ctrl-btn{width:36px;height:36px}
+  .code-box{width:40px;height:48px;font-size:18px}
+  .code-boxes{gap:6px}
+  .deadlines-section{padding:16px}
+}
+@media (max-width:480px){
+  .content-area{padding:12px 10px 80px}
+  .code-box{width:36px;height:44px;font-size:16px}
+  .code-boxes{gap:4px}
+  .pg-title{font-size:20px}
 }
 </style>

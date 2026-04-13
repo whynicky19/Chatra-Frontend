@@ -271,8 +271,18 @@
             <div class="subs-stats">
               <div class="stat-chip"><span class="stat-n">{{ submissions.length }}</span><span class="stat-l">Всего</span></div>
               <div class="stat-chip ok"><span class="stat-n">{{ submissions.filter(s=>s.status==='graded').length }}</span><span class="stat-l">Проверено</span></div>
-              <div class="stat-chip wait"><span class="stat-n">{{ submissions.filter(s=>s.status==='submitted').length }}</span><span class="stat-l">Ожидают</span></div>
+              <div class="stat-chip wait"><span class="stat-n">{{ submissions.filter(s=>s.status==='submitted' || s.status==='late').length }}</span><span class="stat-l">Ожидают</span></div>
             </div>
+            <button
+              v-if="submissions.filter(s=>s.status==='submitted'||s.status==='late').length > 0"
+              class="btn-bulk-grade"
+              :disabled="bulkGrading"
+              @click="runBulkAiGrade"
+            >
+              <svg v-if="!bulkGrading" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <div v-else class="spinner" style="width:12px;height:12px;border-width:2px;border-color:rgba(255,255,255,.3);border-top-color:#fff"></div>
+              {{ bulkGrading ? `Проверяю ${bulkDone}/${bulkTotal}...` : `⚡ Проверить все ожидающие (${submissions.filter(s=>s.status==='submitted'||s.status==='late').length})` }}
+            </button>
             <div class="subs-list">
               <div v-for="s in submissions" :key="s.id" class="sub-row" @click="activeSub = s">
                 <div class="sub-av">{{ getStudentInitials(s.student_id) }}</div>
@@ -328,6 +338,9 @@ const submissions = ref<Submission[]>([])
 const activeSub = ref<Submission|null>(null)
 const loadingSubs = ref(false)
 const grading = ref(false)
+const bulkGrading = ref(false)
+const bulkDone = ref(0)
+const bulkTotal = ref(0)
 const submitting = ref(false)
 const uploading = ref(false)
 const retracting = ref(false)
@@ -440,6 +453,28 @@ const runAiGrade = async () => {
     toast.ok(`ИИ проверил: ${grade.score} / ${props.assignment.max_score}`)
   } catch (e: any) { toast.err(e?.response?.data?.detail || 'Ошибка ИИ-проверки') }
   finally { grading.value = false }
+}
+
+// ─── Bulk AI grade ─────────────────────────────────────────────────────────────
+const runBulkAiGrade = async () => {
+  if (bulkGrading.value) return
+  const pending = submissions.value.filter(s => s.status === 'submitted' || s.status === 'late')
+  if (!pending.length) return
+  bulkGrading.value = true
+  bulkDone.value = 0
+  bulkTotal.value = pending.length
+  let ok = 0
+  for (const sub of pending) {
+    try {
+      const grade = await svc.aiGrade(sub.id)
+      const idx = submissions.value.findIndex(s => s.id === sub.id)
+      if (idx !== -1) submissions.value[idx] = { ...submissions.value[idx], grade, status: 'graded' }
+      ok++
+    } catch {}
+    bulkDone.value++
+  }
+  bulkGrading.value = false
+  toast.ok(`ИИ проверил ${ok} из ${pending.length} работ`)
 }
 
 // ─── Retract submission ────────────────────────────────────────────────────────
@@ -581,6 +616,11 @@ onMounted(async () => {
 .grade-denom { font-size: 18px; color: var(--text4); font-weight: 600; }
 .grade-meta { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
 .grade-pct { font-size: 22px; font-weight: 800; color: var(--text2); font-family: 'Outfit',sans-serif; }
+.grading-pending { display: flex; align-items: center; gap: 10px; padding: 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-lg); font-size: 13px; color: var(--text3); }
+.grading-dots { display: flex; gap: 4px; }
+.grading-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: pulse 1.2s infinite; }
+.grading-dots span:nth-child(2) { animation-delay: .2s; }
+.grading-dots span:nth-child(3) { animation-delay: .4s; }
 .grade-by-tag { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text4); background: var(--surface3); padding: 4px 10px; border-radius: 100px; }
 .grade-feedback { display: flex; flex-direction: column; gap: 6px; }
 .feedback-text { font-size: 13px; color: var(--text2); line-height: 1.7; }
@@ -601,7 +641,10 @@ onMounted(async () => {
 @keyframes bounce { 0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)} }
 
 /* Submissions tab */
-.subs-stats { display: flex; gap: 10px; margin-bottom: 14px; }
+.subs-stats { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; }
+.btn-bulk-grade { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; margin-bottom: 14px; padding: 11px 16px; background: linear-gradient(135deg,#7c3aed,#6d28d9); color: #fff; border: none; border-radius: var(--r-md); font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity .15s; font-family: inherit; }
+.btn-bulk-grade:hover { opacity: .85; }
+.btn-bulk-grade:disabled { opacity: .6; cursor: not-allowed; }
 .stat-chip { display: flex; flex-direction: column; align-items: center; padding: 12px 18px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-lg); min-width: 80px; }
 .stat-n { font-family: 'Outfit',sans-serif; font-size: 26px; font-weight: 900; color: var(--text1); }
 .stat-l { font-size: 11px; color: var(--text4); font-weight: 600; }
@@ -645,4 +688,29 @@ onMounted(async () => {
 .variant-chip.active { background: rgba(0,177,201,.12); border-color: rgba(0,177,201,.4); color: var(--teal); }
 .variant-badge { display: inline-flex; align-items: center; padding: 2px 10px; background: rgba(0,177,201,.1); border: 1px solid rgba(0,177,201,.25); border-radius: 100px; font-size: 11px; font-weight: 700; color: var(--teal); white-space: nowrap; }
 .field-hint-warn { font-size: 12px; color: var(--yellow, #f59e0b); margin-top: 4px; }
+
+@media (max-width:768px) {
+  .am-modal { max-width: 100%; max-height: 96dvh; border-radius: var(--r-2xl) var(--r-2xl) 0 0; }
+  .am-head { padding: 16px 14px 12px; }
+  .am-ico { width: 36px; height: 36px; }
+  .am-title { font-size: 16px; margin-bottom: 6px; }
+  .am-badges { flex-wrap: wrap; gap: 6px; }
+  .am-tabs { padding: 0 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+  .am-tab { padding: 10px 12px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+  .am-body { padding: 14px 14px 24px; gap: 14px; }
+  .inp { font-size: 16px; }
+  .inp-ta { font-size: 16px; min-height: 100px; }
+  .grade-num { font-size: 32px; }
+  .grade-pct { font-size: 18px; }
+  .sub-row { padding: 10px 12px; gap: 10px; }
+  .variant-chips { gap: 6px; }
+  .variant-chip { padding: 9px 14px; min-height: 44px; }
+  .grade-actions { flex-direction: column; gap: 8px; }
+  .grade-actions .btn { width: 100%; justify-content: center; }
+}
+@media (max-width:480px) {
+  .am-head-l { flex-direction: column; gap: 8px; }
+  .am-head { padding: 14px 12px 10px; }
+  .am-body { padding: 12px 12px 24px; }
+}
 </style>

@@ -51,4 +51,15 @@ const sub = async () => { loading.value=true; const ok=await login(email.value,p
 .auth-link-row{text-align:center;font-size:13px;color:#4a7a86;margin-top:20px}
 .auth-link{color:#00B1C9;font-weight:600;transition:color .15s}
 .auth-link:hover{color:#009aaf}
+
+@media (max-width:768px) {
+  .auth-card { padding: 24px 16px 28px; border-radius: var(--r-xl); }
+  .auth-title { font-size: 20px; }
+  .input { font-size: 16px !important; }
+  .btn-lg { min-height: 48px; font-size: 15px; }
+  .pw-eye { min-width: 44px; min-height: 44px; right: 0; }
+}
+@media (max-width:480px) {
+  .auth-card { padding: 20px 12px 24px; }
+}
 </style>

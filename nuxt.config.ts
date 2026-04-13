@@ -33,8 +33,5 @@ export default defineNuxtConfig({
         '#app-manifest': fileURLToPath(new URL('./.nuxt/manifest/meta/dev.json', import.meta.url)),
       },
     },
-    optimizeDeps: {
-      exclude: ['#app-manifest'],
-    },
   },
 })

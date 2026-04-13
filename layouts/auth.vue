@@ -117,4 +117,16 @@ onUnmounted(() => cancelAnimationFrame(animId))
 .auth-brand { display:flex;align-items:center;justify-content:center;animation:brand-enter 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both }
 @keyframes brand-enter { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
 .auth-logo-img { width:180px;height:auto;object-fit:contain }
+
+@media (max-width:768px) {
+  .auth-shell { overflow-x: hidden; }
+  .auth-content { padding: 16px; gap: 16px; max-width: 100%; }
+  .auth-logo-img { width: 130px; }
+  .orb-1 { width: 300px; height: 300px; }
+  .orb-2 { width: 500px; height: 500px; }
+  .orb-3 { width: 700px; height: 700px; }
+}
+@media (max-width:480px) {
+  .auth-content { padding: 12px; }
+}
 </style>

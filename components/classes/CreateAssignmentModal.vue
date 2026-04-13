@@ -448,4 +448,25 @@ const submit = async () => {
 .var-upload-btn:hover { background: rgba(52,211,153,.15); }
 .var-file-chip { display: flex; align-items: center; gap: 6px; padding: 5px 10px; background: rgba(52,211,153,.07); border: 1px solid rgba(52,211,153,.2); border-radius: var(--r-md); font-size: 12px; color: var(--text2); white-space: nowrap; max-width: 160px; }
 .var-file-chip span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+@media (max-width:768px) {
+  .modal { max-width: 100%; max-height: 96dvh; border-radius: var(--r-2xl) var(--r-2xl) 0 0; }
+  .modal-head { padding: 16px 14px 12px; }
+  .modal-body { padding: 14px 14px; }
+  .modal-foot { padding: 12px 14px 24px; }
+  .field-row { grid-template-columns: 1fr; gap: 12px; }
+  .inp { font-size: 16px; }
+  .inp-ta { font-size: 16px; min-height: 80px; }
+  .criterion-row { grid-template-columns: 24px 1fr 70px 28px; gap: 6px; padding: 8px; }
+  .file-drop { padding: 14px; }
+  .ref-section { padding: 12px; }
+  .var-section { padding: 12px; }
+  .variant-row { flex-wrap: wrap; gap: 6px; }
+  .var-upload-btn { min-height: 44px; }
+}
+@media (max-width:480px) {
+  .modal-body { padding: 12px 12px; }
+  .modal-foot { padding: 10px 12px 20px; }
+  .criterion-row { grid-template-columns: 20px 1fr 60px 24px; gap: 4px; }
+}
 </style>

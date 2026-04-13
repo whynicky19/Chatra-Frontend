@@ -59,6 +59,12 @@
       </NuxtLink>
     </nav>
 
+    <!-- Nudge: нет ФИО -->
+    <div v-if="!isCollapsed && !isMobile && !auth.fullname" class="fio-nudge" @click="$router.push('/settings')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>Укажите ваше ФИО в настройках</span>
+    </div>
+
     <div class="sb-bottom">
       <a href="https://t.me/whynicky" target="_blank" class="sb-item help-item" :title="t('chats.help_center')">
         <div class="item-icon">
@@ -128,6 +134,8 @@ onMounted(() => {
 .help-item{color:var(--text4)}
 .logout-item{color:var(--text4)}
 .logout-item:hover{background:var(--red-l)!important;color:var(--red)!important}
+.fio-nudge{display:flex;align-items:center;gap:8px;margin:0 6px 8px;padding:10px 12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:var(--r-md);font-size:12px;font-weight:600;color:#b45309;cursor:pointer;transition:background .15s;}
+.fio-nudge:hover{background:rgba(245,158,11,.18);}
 
 @media (max-width:768px){
   .sb{
@@ -138,12 +146,15 @@ onMounted(() => {
     flex-direction:row;
     border-right:none;
     border-top:1px solid var(--border);
-    z-index:100;
+    z-index:200;
     overflow:visible;
+    background:var(--surface);
+    box-shadow:0 -2px 16px rgba(0,0,0,.08);
   }
   .sb.collapsed{width:100%!important}
   .sb-logo{display:none}
   .lang-switch{display:none}
+  .fio-nudge{display:none}
   .sb-nav{
     flex-direction:row;
     flex:1;
@@ -162,12 +173,14 @@ onMounted(() => {
     align-items:center;
     flex:1;
     min-width:44px;
+    min-height:44px;
     white-space:nowrap;
   }
+  .sb-item .item-label{display:none}
   .sb-item.active{background:transparent;border-left:none}
   .sb-item.active .item-icon{color:var(--teal)}
   .sb-item.active .item-icon svg{stroke:var(--teal)}
-  .item-icon{width:22px;height:22px}
+  .item-icon{width:24px;height:24px}
   .notif-pill{display:none}
   .sb-bottom{
     flex-direction:row;
@@ -179,5 +192,10 @@ onMounted(() => {
   .help-item{display:none}
   .collapsed .sb-item{justify-content:center;padding:6px 4px 4px}
   .collapsed .sb-logo{display:none}
+}
+@media (max-width:480px){
+  .sb{height:56px}
+  .sb-item{min-width:40px}
+  .item-icon{width:22px;height:22px}
 }
 </style>

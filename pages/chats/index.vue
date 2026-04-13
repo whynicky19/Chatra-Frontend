@@ -181,12 +181,21 @@ onUnmounted(()=>{if(import.meta.client)window.removeEventListener('resize',_resi
 .chat-switch-leave-to{opacity:0;transform:translateX(-6px)}
 .bg-b0{background:linear-gradient(135deg,#00B1C9,#007a8e)}.bg-b1{background:linear-gradient(135deg,#009aaf,#006a80)}.bg-b2{background:linear-gradient(135deg,#00c4de,#009aaf)}.bg-b3{background:linear-gradient(135deg,#0891b2,#0e7490)}.bg-b4{background:linear-gradient(135deg,#06b6d4,#0891b2)}.bg-b5{background:linear-gradient(135deg,#22d3ee,#06b6d4)}
 @media (max-width:768px){
-  .chats-layout{position:relative}
+  .chats-layout{position:relative;overflow-x:hidden}
   .mobile-list .chat-list-panel{width:100%;border-right:none}
   .mobile-list .chat-main{display:none}
   .mobile-chat .chat-list-panel{display:none}
   .mobile-chat .chat-main{display:flex;width:100%}
   .clp-head{padding:14px 12px 8px}
-  .chat-item{margin:1px 4px}
+  .clp-title{font-size:18px}
+  .chat-item{margin:1px 4px;min-height:56px}
+  .chat-name{font-size:15px}
+  .chat-preview{font-size:12px}
+  .search-inp{font-size:16px}
+  .av-img{width:40px;height:40px}
+}
+@media (max-width:480px){
+  .clp-head{padding:12px 10px 6px}
+  .clp-search{padding:0 10px 8px}
 }
 </style>

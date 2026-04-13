@@ -21,11 +21,19 @@
 
         <!-- Grid -->
         <div class="classes-grid">
-          <div v-if="loading" style="grid-column:1/-1;display:flex;justify-content:center;padding:60px">
-            <div class="spinner" style="width:28px;height:28px;border-width:3px"></div>
-          </div>
+          <template v-if="loading">
+            <div v-for="n in 6" :key="n" class="class-card skeleton-card">
+              <div class="skel-cover"></div>
+              <div class="skel-body">
+                <div class="skel-line skel-title"></div>
+                <div class="skel-line skel-desc"></div>
+                <div class="skel-line skel-desc short"></div>
+                <div class="skel-line skel-meta"></div>
+              </div>
+            </div>
+          </template>
 
-          <div v-else-if="!visibleClasses.length" class="empty-state" style="grid-column:1/-1">
+          <div v-if="!loading && !visibleClasses.length" class="empty-state" style="grid-column:1/-1">
             <div class="es-icon-wrap">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
             </div>
@@ -34,7 +42,7 @@
             <button class="btn btn-teal es-btn" @click="showJoin=true">{{ t('classes.join_code') }}</button>
           </div>
 
-          <template v-else>
+          <template v-if="!loading && visibleClasses.length">
             <!-- Class cards -->
             <div v-for="cls in visibleClasses" :key="cls.id" class="class-card" @click="goClass(cls.id)">
               <!-- Cover image -->
@@ -381,4 +389,41 @@ onMounted(()=>{ load() })
 .del-body{display:flex;align-items:flex-start;gap:14px;padding:4px 0 18px}
 .del-icon{width:44px;height:44px;border-radius:var(--r-md);background:var(--red-l);border:1px solid rgba(220,38,38,.2);display:flex;align-items:center;justify-content:center;color:var(--red);flex-shrink:0}
 .del-text{font-size:14px;color:var(--text2);line-height:1.7}
+/* Skeleton loader */
+@keyframes skel-shine{0%{background-position:-200px 0}100%{background-position:calc(200px + 100%) 0}}
+.skeleton-card{pointer-events:none;cursor:default}
+.skeleton-card:hover{transform:none!important;box-shadow:var(--sh-xs)!important;border-color:var(--border)!important}
+.skel-cover{height:200px;background:linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 50%,var(--surface2) 75%);background-size:400px 100%;animation:skel-shine 1.4s ease infinite}
+.skel-body{padding:18px 18px 16px;display:flex;flex-direction:column;gap:10px}
+.skel-line{border-radius:6px;background:linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 50%,var(--surface2) 75%);background-size:400px 100%;animation:skel-shine 1.4s ease infinite}
+.skel-title{height:18px;width:70%}
+.skel-desc{height:12px;width:90%}
+.skel-desc.short{width:55%}
+.skel-meta{height:11px;width:40%;margin-top:4px}
+
+@media (max-width:768px) {
+  .content-area { padding: 16px 12px 80px; }
+  .pg-head { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
+  .pg-head-left { width: 100%; }
+  .pg-head-r { width: 100%; justify-content: flex-start; flex-wrap: wrap; gap: 8px; }
+  .pg-title { font-size: 22px; }
+  .pg-sub { font-size: 13px; }
+  .btn-outline-teal { min-height: 44px; padding: 10px 16px; }
+  .classes-grid { grid-template-columns: 1fr; gap: 14px; }
+  .card-cover { height: 160px; }
+  .skel-cover { height: 160px; }
+  .add-card { min-height: 120px; }
+  .add-card-inner { padding: 24px 16px; }
+  .ctrl-btn { width: 36px; height: 36px; }
+  .card-action-btn { font-size: 14px; min-height: 36px; }
+  .code-box { width: 40px; height: 48px; font-size: 18px; }
+  .code-boxes { gap: 6px; }
+  .join-modal { max-width: 100%; }
+  .deadlines-section { padding: 16px; }
+}
+@media (max-width:480px) {
+  .content-area { padding: 12px 10px 80px; }
+  .code-box { width: 36px; height: 44px; font-size: 16px; }
+  .code-boxes { gap: 4px; }
+}
 </style>

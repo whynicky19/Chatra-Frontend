@@ -451,4 +451,30 @@ onMounted(() => {
 /* Code blocks */
 :deep(.code-bl) { background: #0a0a16; color: #99e6f0; border-radius: var(--r-md); padding: 14px; margin: 8px 0; overflow-x: auto; font-size: 13px; font-family: monospace; line-height: 1.6; border: 1px solid var(--border) }
 :deep(.ic) { background: rgba(0,177,201,.15); padding: 2px 6px; border-radius: 4px; font-family: monospace; font-size: .9em; color: var(--teal) }
+
+@media (max-width:768px) {
+  .ai-page { overflow-x: hidden; }
+  .chat-head { padding: 0 14px; height: 54px; }
+  .chat-title { font-size: 16px; }
+  .chat-sub { display: none; }
+  .online-pill { font-size: 11px; padding: 4px 10px; }
+  .chat-area { padding: 14px 12px; }
+  .chat-msg { max-width: 90%; }
+  .msg-bubble { padding: 10px 14px; font-size: 13px; }
+  .chat-inp { padding: 10px 12px; gap: 6px; }
+  .chat-field { font-size: 16px; padding: 10px 14px; }
+  .send-btn { width: 44px; height: 44px; }
+  .attach-icon { width: 44px; height: 44px; }
+  .empty-chips { gap: 8px; padding: 0 8px; }
+  .e-chip { font-size: 12px; padding: 8px 14px; }
+  .ai-empty-logo { width: 64px; height: 64px; }
+  :deep(.code-bl) { font-size: 12px; overflow-x: auto; }
+}
+@media (max-width:480px) {
+  .chat-head { padding: 0 10px; }
+  .ai-logo-wrap { width: 36px; height: 36px; border-radius: 10px; }
+  .chat-area { padding: 10px 10px; }
+  .empty-chips { flex-direction: column; align-items: stretch; }
+  .e-chip { text-align: center; }
+}
 </style>
