@@ -134,3 +134,4 @@ const submit = async () => {
   .crit-row { grid-template-columns: 18px 1fr 56px 20px; gap: 3px; }
 }
 </style>
+

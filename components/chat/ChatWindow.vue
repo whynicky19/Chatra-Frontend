@@ -46,7 +46,7 @@
         <div v-for="u in chatsStore.activeUsers" :key="u.id" class="member-chip">
           <img v-if="getAvatar(u.id)" :src="getAvatar(u.id)" class="chip-av-img"/>
           <div v-else :class="['av','av-xs',colorFor(u.id)]">{{getNickInit(u)}}</div>
-          <span class="truncate" style="font-size:12px;font-weight:500;max-width:110px">@{{getNick(u)}}</span>
+          <span class="truncate" style="font-size:12px;font-weight:500;max-width:110px">{{getNick(u)}}</span>
           <button v-if="u.id!==auth.user?.id" class="chip-remove" @click="removeUser(u.id)" title="Удалить">×</button>
         </div>
       </div>
@@ -54,7 +54,7 @@
 
     <!-- Messages -->
     <div ref="area" class="msg-area">
-      <div v-if="chatsStore.loadingMsgs && !filteredMsgs.length" class="empty">
+      <div v-if="chatsStore.loadingMsgs" class="empty">
         <div class="spinner" style="width:24px;height:24px;border-width:3px"></div>
       </div>
       <div v-else-if="!filteredMsgs.length" class="empty">
@@ -138,7 +138,7 @@
             <img v-if="getAvatar(u.id)" :src="getAvatar(u.id)" class="av-img-xs"/>
             <div v-else :class="['av','av-sm',colorFor(u.id)]">{{getNickInit(u)}}</div>
             <div style="flex:1;min-width:0">
-              <div class="truncate" style="font-size:13px;font-weight:500;color:var(--text1)">@{{getNick(u)}}</div>
+              <div class="truncate" style="font-size:13px;font-weight:500;color:var(--text1)">{{getNick(u)}}</div>
               <div style="font-size:11px;color:var(--text4)">{{u.email}}</div>
             </div>
             <button
@@ -159,7 +159,7 @@
             <div v-for="u in chatsStore.activeUsers" :key="u.id" class="member-row">
               <img v-if="getAvatar(u.id)" :src="getAvatar(u.id)" class="av-img-xs"/>
               <div v-else :class="['av','av-xs',colorFor(u.id)]">{{getNickInit(u)}}</div>
-              <span class="truncate" style="font-size:13px;flex:1;color:var(--text1)">@{{getNick(u)}}</span>
+              <span class="truncate" style="font-size:13px;flex:1;color:var(--text1)">{{getNick(u)}}</span>
               <button v-if="u.id!==auth.user?.id" class="btn btn-danger btn-sm" @click="removeUser(u.id)">Удалить</button>
             </div>
           </div>
@@ -214,17 +214,18 @@ const colorFor = (id: number) => avColors[id % avColors.length]
 
 const nickReg = () => { try { return JSON.parse(localStorage.getItem('_nick_registry')||'{}') } catch { return {} } }
 const avatarReg = () => { try { return JSON.parse(localStorage.getItem('_avatar_registry')||'{}') } catch { return {} } }
-const getNick = (u: any): string => nickReg()[u.id] || u.email.split('@')[0]
+const getNick = (u: any): string => u.full_name || nickReg()[u.id] || u.email.split('@')[0]
 const getNickInit = (u: any): string => getNick(u)[0]?.toUpperCase()||'?'
 const getAvatar = (uid: number): string => uid===auth.user?.id&&auth.avatar ? auth.avatar : (avatarReg()[uid]||'')
 
-// Chat title — show @nick for DMs
+// Chat title — show full name for DMs
 const chatTitle = computed(() => {
   const users = chatsStore.activeUsers
   const other = users.find(u => u.id !== auth.user?.id)
   if (other && users.length <= 2) {
+    if (other.full_name) return other.full_name
     const nick = nickReg()[other.id]
-    if (nick) return `@${nick}`
+    if (nick) return nick
     return other.email.split('@')[0]
   }
   return chatsStore.active?.name || ''
@@ -292,7 +293,7 @@ const doAddUser = async (user: any) => {
   try {
     await chatsSvc.addUser(chatsStore.active.id, user.id)
     await loadUsers(chatsStore.active.id)
-    toast.ok(`@${getNick(user)} добавлен`)
+    toast.ok(`${getNick(user)} добавлен`)
   } catch (e: any) { toast.err(e?.response?.data?.detail||'Ошибка') }
   finally { addingId.value=null }
 }

@@ -35,6 +35,7 @@ export interface SubmissionCreate {
   file_url?: string
   file_urls?: string[]
   variant_number?: number
+  student_name?: string
 }
 
 export interface Submission {

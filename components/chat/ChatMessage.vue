@@ -8,7 +8,7 @@
 
     <div :class="['mgroup',{own:isOwn}]">
       <!-- Sender nick -->
-      <div v-if="showName&&!isOwn" class="sender-name">@{{senderNick}}</div>
+      <div v-if="showName&&!isOwn" class="sender-name">{{senderNick}}</div>
 
       <!-- Bubble -->
       <div :class="['bubble',isOwn?'b-own':'b-other']" @mouseenter="hov=true" @mouseleave="hov=false">
@@ -89,9 +89,10 @@ const getAvatar = (uid: number): string => {
   return avatarReg()[uid] || ''
 }
 const getNickForUser = (uid: number): string => {
+  const u = props.chatUsers?.find(u => u.id === uid)
+  if (u?.full_name) return u.full_name
   const reg = nickReg()
   if (reg[uid]) return reg[uid]
-  const u = props.chatUsers?.find(u => u.id === uid)
   return u?.email?.split('@')[0] || `User ${uid}`
 }
 

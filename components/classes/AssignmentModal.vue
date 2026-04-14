@@ -434,7 +434,13 @@ const loadSubs = async () => {
     const nickReg: Record<number, string> = JSON.parse(localStorage.getItem('_nick_registry') || '{}')
     const map: Record<number, string> = {}
     for (const u of users) {
-      map[u.id] = u.full_name || fnReg[u.id] || nickReg[u.id] || u.name || u.email || `Студент #${u.id}`
+      map[u.id] = u.full_name || u.fullName || fnReg[u.id] || nickReg[u.id] || u.name || u.email || `Студент #${u.id}`
+    }
+    // Enrich with student_name from submission objects — backend returns it directly
+    for (const sub of subs) {
+      if (sub.student_name && sub.student_id) {
+        map[sub.student_id] = sub.student_name
+      }
     }
     studentMap.value = map
   }
@@ -513,6 +519,7 @@ const doSubmit = async () => {
       text_content: form.value.text.trim() || undefined,
       file_urls: fileUrls.length ? fileUrls : undefined,
       variant_number: form.value.variantNumber ?? undefined,
+      student_name: auth.fullname || undefined,
     })
     mySubmission.value = sub
     toast.ok('Работа успешно сдана!')

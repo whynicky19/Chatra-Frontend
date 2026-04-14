@@ -55,8 +55,8 @@
               <tr v-for="u in fUsers" :key="u.id">
                 <td>
                   <div style="display:flex;align-items:center;gap:8px">
-                    <div :class="['av','av-sm',colorFor(u.id)]">{{u.email[0].toUpperCase()}}</div>
-                    <span style="font-size:13px;font-weight:500">{{u.email.split('@')[0]}}</span>
+                    <div :class="['av','av-sm',colorFor(u.id)]">{{(u.full_name || u.email)[0].toUpperCase()}}</div>
+                    <span style="font-size:13px;font-weight:500">{{u.full_name || u.email.split('@')[0]}}</span>
                   </div>
                 </td>
                 <td style="font-size:13px;color:var(--text3)">{{u.email}}</td>
@@ -243,14 +243,17 @@ const nu = ref({ e: '', p: '', r: 'student' }); const chatsCount = ref(0); const
 const today = new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.')
 const avColors = ['bg-b0', 'bg-b1', 'bg-b2', 'bg-b3', 'bg-b4', 'bg-b5']
 const colorFor = (id: number) => avColors[id % avColors.length]
-const fUsers = computed(() => users.value.filter(u => u.email.toLowerCase().includes(sq.value.toLowerCase())))
+const fUsers = computed(() => users.value.filter(u => {
+  const q = sq.value.toLowerCase()
+  return u.email.toLowerCase().includes(q) || (u.full_name || '').toLowerCase().includes(q)
+}))
 
 // ── AI Usage ──────────────────────────────────────────────────────────────────
 const aiLogs = ref<any[]>([]); const aiSummary = ref<any[]>([]); const aiTotal = ref(0)
 const aiPage = ref(1); const aiPageSize = 50; const aiLoading = ref(false)
 const aiFilterClass = ref<number | null>(null)
 const aiTotalTokens = computed(() => aiSummary.value.filter((s: any) => aiFilterClass.value === null || s.class_id === aiFilterClass.value).reduce((sum: number, s: any) => sum + (s.total_tokens || 0), 0))
-const userMap = computed(() => { const m: Record<number, string> = {}; for (const u of users.value) m[u.id] = u.email; return m })
+const userMap = computed(() => { const m: Record<number, string> = {}; for (const u of users.value) m[u.id] = u.full_name || u.email; return m })
 const getUserEmail = (uid: number | null) => uid ? (userMap.value[uid] || '#' + uid) : '—'
 const fmtDate = (iso: string) => { if (!iso) return '—'; try { const d = new Date(iso); return d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: '2-digit' }) + ' ' + d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }) } catch { return iso } }
 const loadAiUsage = async (page = 1) => { aiLoading.value = true; aiPage.value = page; try { const params: any = { page, page_size: aiPageSize }; if (aiFilterClass.value !== null) params.class_id = aiFilterClass.value; const res = await adminSvc.aiUsage(params); aiLogs.value = res.items; aiTotal.value = res.total } catch { toast.err('Ошибка загрузки данных ИИ') } finally { aiLoading.value = false } }
