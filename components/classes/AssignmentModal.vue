@@ -379,9 +379,10 @@ const assignmentFiles = computed(() => {
   return files
 })
 
-const parsedDeadline = computed(() => props.assignment.deadline ? new Date(props.assignment.deadline) : null)
+const parseUtc = (d: string) => new Date(d.endsWith('Z') || d.includes('+') ? d : d + 'Z')
+const parsedDeadline = computed(() => props.assignment.deadline ? parseUtc(props.assignment.deadline) : null)
 const isOverdue = computed(() => parsedDeadline.value ? parsedDeadline.value < new Date() : false)
-const deadlineStr = computed(() => parsedDeadline.value?.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) ?? '')
+const deadlineStr = computed(() => parsedDeadline.value?.toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) ?? '')
 const canSubmit = computed(() =>
   (form.value.text.trim() || submittedFiles.value.length) &&
   !submitting.value &&
@@ -392,7 +393,7 @@ const canSubmit = computed(() =>
 const getStudentName = (id: number) => studentMap.value[id] || `Студент #${id}`
 const getStudentInitials = (id: number) => { const fn = studentMap.value[id]; if (!fn) return String(id); const parts = fn.trim().split(' ').filter(Boolean); return parts.map((p:string) => p[0]).join('').toUpperCase().slice(0, 2) || String(id) }
 const statusLabel = (s: string) => ({ submitted: 'Выполнено', grading: 'Проверяется', graded: 'Оценено', late: 'Просрочено' }[s] || s)
-const fmtDate = (d: string) => new Date(d).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+const fmtDate = (d: string) => parseUtc(d).toLocaleString('ru-RU', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 const getFileName = (url: string) => { try { return decodeURIComponent(new URL(url).pathname.split('/').pop() || url) } catch { return url.slice(-40) } }
 const getEmoji = (url: string) => {
   const e = url.split('.').pop()?.split('?')[0]?.toLowerCase() || ''

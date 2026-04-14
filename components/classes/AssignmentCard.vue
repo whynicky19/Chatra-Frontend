@@ -73,17 +73,17 @@ const props = defineProps<{
 
 defineEmits(['open'])
 
-const parsedDeadline = computed(() => props.assignment.deadline ? new Date(props.assignment.deadline) : null)
-const now = new Date()
-const isOverdue = computed(() => parsedDeadline.value ? parsedDeadline.value < now : false)
+const parseUtc = (d: string) => new Date(d.endsWith('Z') || d.includes('+') ? d : d + 'Z')
+const parsedDeadline = computed(() => props.assignment.deadline ? parseUtc(props.assignment.deadline) : null)
+const isOverdue = computed(() => parsedDeadline.value ? parsedDeadline.value < new Date() : false)
 const isDueSoon = computed(() => {
   if (!parsedDeadline.value || isOverdue.value) return false
-  return parsedDeadline.value.getTime() - now.getTime() < 1000 * 60 * 60 * 48
+  return parsedDeadline.value.getTime() - new Date().getTime() < 1000 * 60 * 60 * 48
 })
 
 const daysLeft = computed(() => {
   if (!parsedDeadline.value) return ''
-  const diff = parsedDeadline.value.getTime() - now.getTime()
+  const diff = parsedDeadline.value.getTime() - new Date().getTime()
   const days = Math.ceil(diff / (1000 * 60 * 60 * 24))
   if (days <= 0) return 'сегодня'
   if (days === 1) return '1 дн.'

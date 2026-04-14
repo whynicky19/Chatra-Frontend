@@ -54,7 +54,7 @@
 
     <!-- Messages -->
     <div ref="area" class="msg-area">
-      <div v-if="chatsStore.loadingMsgs" class="empty">
+      <div v-if="chatsStore.loadingMsgs && !filteredMsgs.length" class="empty">
         <div class="spinner" style="width:24px;height:24px;border-width:3px"></div>
       </div>
       <div v-else-if="!filteredMsgs.length" class="empty">

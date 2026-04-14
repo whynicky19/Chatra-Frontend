@@ -45,6 +45,13 @@ export const useChatsStore = defineStore('chats', {
 
     setMsgs(id: number, m: Msg[]) { this.messages[id] = m },
 
+    mergeMsgs(id: number, m: Msg[]) {
+      if (!this.messages[id]) { this.messages[id] = m; return }
+      const existingIds = new Set(this.messages[id].map(x => x.id))
+      const toAdd = m.filter(x => !existingIds.has(x.id))
+      if (toAdd.length) this.messages[id].push(...toAdd)
+    },
+
     addMsg(id: number, m: Msg, myId: number) {
       if (!this.messages[id]) this.messages[id] = []
       if (!this.messages[id].find(x => x.id === m.id)) {

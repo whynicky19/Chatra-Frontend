@@ -21,6 +21,13 @@ export const useChat = () => {
     } catch {} finally { store.loadingMsgs = false }
   }
 
+  const refreshMsgs = async (id: number) => {
+    try {
+      const m = await msgSvc.list(id)
+      store.mergeMsgs(id, m)
+    } catch {}
+  }
+
   const loadUsers = async (id: number) => {
     try {
       const u = await chatSvc.users(id)
@@ -58,7 +65,7 @@ export const useChat = () => {
   const connectWs = (id: number) => {
     // Pass JWT token so backend can authenticate the WS connection
     store.connectWs(id, cfg.public.wsBase, async () => {
-      await loadMsgs(id)
+      await refreshMsgs(id)
       if (store.active?.id !== id) {
         store.unread[id] = (store.unread[id] || 0) + 1
         if (import.meta.client && localStorage.getItem('soundNotif') === '1') {
@@ -127,5 +134,5 @@ export const useChat = () => {
     } catch { toast.err('Ошибка удаления') }
   }
 
-  return { loadMsgs, loadUsers, connectWs, sendMsg, delMsg, startChatPoller }
+  return { loadMsgs, refreshMsgs, loadUsers, connectWs, sendMsg, delMsg, startChatPoller }
 }
