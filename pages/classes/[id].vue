@@ -56,23 +56,36 @@
           </div>
 
           <!-- Tabs -->
-          <div class="tabs-bar">
-            <button :class="['tab-btn', { active: tab === 'lectures' }]" @click="tab = 'lectures'">
-              {{ t('class.lectures') }}
-              <span v-if="lectures.length" class="tab-num">{{ lectures.length }}</span>
-            </button>
-            <button :class="['tab-btn', { active: tab === 'materials' }]" @click="tab = 'materials'">
-              {{ t('class.materials') }}
-              <span v-if="materials.length" class="tab-num">{{ materials.length }}</span>
-            </button>
-            <button :class="['tab-btn', { active: tab === 'assignments' }]" @click="tab = 'assignments'; loadAssignments()">
-              {{ t('class.assignments') }}
-              <span v-if="assignments.length" class="tab-num">{{ assignments.length }}</span>
-            </button>
-            <button :class="['tab-btn tab-ai', { active: tab === 'ai' }]" @click="tab = 'ai'; loadAssignments()">
-              ✨ {{ t('class.ai_chat') }}
-            </button>
-            <div class="tabs-actions" v-if="isTeacher">
+          <div class="tabs-wrap">
+            <div class="tabs-bar">
+              <button :class="['tab-btn', { active: tab === 'lectures' }]" @click="tab = 'lectures'">
+                {{ t('class.lectures') }}
+                <span v-if="lectures.length" class="tab-num">{{ lectures.length }}</span>
+              </button>
+              <button :class="['tab-btn', { active: tab === 'materials' }]" @click="tab = 'materials'">
+                {{ t('class.materials') }}
+                <span v-if="materials.length" class="tab-num">{{ materials.length }}</span>
+              </button>
+              <button :class="['tab-btn', { active: tab === 'assignments' }]" @click="tab = 'assignments'; loadAssignments()">
+                {{ t('class.assignments') }}
+                <span v-if="assignments.length" class="tab-num">{{ assignments.length }}</span>
+              </button>
+              <button :class="['tab-btn tab-ai', { active: tab === 'ai' }]" @click="tab = 'ai'; loadAssignments()">
+                ✨ {{ t('class.ai_chat') }}
+              </button>
+              <div class="tabs-actions tabs-actions-desktop" v-if="isTeacher">
+                <button class="btn btn-white btn-sm" @click="showCreateAssignment = true">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                  {{ t('class.assignment_btn') }}
+                </button>
+                <button class="btn btn-teal btn-sm" @click="showCreate = true">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+                  {{ t('class.add') }}
+                </button>
+              </div>
+            </div>
+            <!-- Teacher actions — separate row on mobile -->
+            <div class="tabs-actions-mobile" v-if="isTeacher">
               <button class="btn btn-white btn-sm" @click="showCreateAssignment = true">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
                 {{ t('class.assignment_btn') }}
@@ -744,7 +757,9 @@ onMounted(async () => {
 .class-code-chip:hover{background:var(--teal-m);border-color:rgba(0,177,201,.4)}
 
 /* Tabs */
-.tabs-bar{display:flex;align-items:center;padding:0 24px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface);gap:0}
+.tabs-wrap{flex-shrink:0;background:var(--surface);border-bottom:1px solid var(--border)}
+.tabs-actions-mobile{display:none}
+.tabs-bar{display:flex;align-items:center;padding:0 24px;gap:0}
 .tab-btn{display:flex;align-items:center;gap:8px;padding:14px 18px;font-size:13px;font-weight:500;color:var(--text4);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:inherit}
 .tab-btn:hover{color:var(--text1)}
 .tab-btn.active{color:var(--teal);border-bottom-color:var(--teal);font-weight:600}
@@ -883,16 +898,34 @@ onMounted(async () => {
 @keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 
 @media (max-width:768px){
-  .cd-page { overflow-x: hidden; }
-  .cd-topbar{padding:0 12px}
+  .cd-page { overflow-x: hidden; max-width: 100vw; }
+  .cd-topbar{
+    padding:0 12px;
+    background:rgba(240,248,250,0.78);
+    backdrop-filter:blur(24px) saturate(200%);
+    -webkit-backdrop-filter:blur(24px) saturate(200%);
+    border-bottom:1px solid rgba(255,255,255,0.6);
+    box-shadow:0 2px 16px rgba(0,177,201,0.06),inset 0 -1px 0 rgba(0,177,201,0.08);
+  }
   .topbar-breadcrumb{max-width:160px;overflow:hidden}
   .cd-sidebar{display:none}
-  .cd-layout{flex-direction:column}
-  .tabs-bar{padding:0 8px;overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap}
-  .tab-btn{padding:12px 10px;font-size:12px;flex-shrink:0;white-space:nowrap}
-  .tabs-actions{gap:4px;flex-shrink:0}
-  .tabs-actions .btn{padding:6px 10px;font-size:12px}
-  .tab-content{padding:10px 12px 80px}
+  .cd-layout{flex-direction:column;overflow-x:hidden}
+  .cd-main{overflow-x:hidden;max-width:100%}
+  .tabs-wrap{
+    overflow:hidden;
+    background:rgba(248,252,253,0.75);
+    backdrop-filter:blur(20px) saturate(180%);
+    -webkit-backdrop-filter:blur(20px) saturate(180%);
+    border-bottom:1px solid rgba(255,255,255,0.5);
+    box-shadow:0 2px 12px rgba(0,177,201,0.05),inset 0 -1px 0 rgba(0,177,201,0.07);
+  }
+  .tabs-bar{padding:0;overflow-x:hidden;flex-wrap:nowrap}
+  .tab-btn{flex:1;justify-content:center;padding:12px 4px;font-size:11px;white-space:nowrap;min-width:0}
+  .tab-num{display:none}
+  .tabs-actions-desktop{display:none}
+  .tabs-actions-mobile{display:flex;gap:8px;padding:8px 12px;border-top:1px solid var(--border)}
+  .tabs-actions-mobile .btn{flex:1;justify-content:center;min-height:40px;font-size:12px}
+  .tab-content{padding:10px 12px 80px;overflow-x:hidden}
   .page-header{padding:14px 12px 12px}
   .page-title{font-size:20px}
   .page-sub{font-size:12px}
@@ -909,10 +942,23 @@ onMounted(async () => {
   .field-input,.field-textarea{font-size:16px}
 }
 @media (max-width:480px){
-  .tabs-bar{padding:0 4px}
-  .tab-btn{padding:10px 8px;font-size:11px}
+  .tab-btn{font-size:10px;padding:10px 2px}
   .tab-content{padding:8px 10px 80px}
   .item-row{padding:12px 10px;gap:10px}
   .page-title{font-size:18px}
+}
+
+/* Dark mode liquid glass */
+@media (max-width:768px) {
+  :global(html.dark) .cd-topbar {
+    background: rgba(8,14,16,0.78);
+    border-bottom: 1px solid rgba(0,177,201,0.15);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 -1px 0 rgba(0,177,201,0.1);
+  }
+  :global(html.dark) .tabs-wrap {
+    background: rgba(8,14,16,0.72);
+    border-bottom: 1px solid rgba(0,177,201,0.12);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3), inset 0 -1px 0 rgba(0,177,201,0.08);
+  }
 }
 </style>

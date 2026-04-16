@@ -47,8 +47,8 @@ onUnmounted(() => {
 .shell{display:flex;height:100vh;overflow:hidden;background:var(--bg)}
 .shell-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 @media (max-width:768px){
-  .shell{flex-direction:column;overflow:hidden}
-  .shell-main{overflow:hidden}
+  .shell{flex-direction:column;overflow:hidden;width:100%;max-width:100vw}
+  .shell-main{overflow:hidden;width:100%;max-width:100vw;overflow-x:hidden}
 }
 @media (max-width:480px){}
 </style>

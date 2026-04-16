@@ -145,11 +145,13 @@ onMounted(() => {
     height:60px;
     flex-direction:row;
     border-right:none;
-    border-top:1px solid var(--border);
+    border-top:1px solid rgba(255,255,255,0.6);
     z-index:200;
     overflow:visible;
-    background:var(--surface);
-    box-shadow:0 -2px 16px rgba(0,0,0,.08);
+    background:rgba(240,248,250,0.72);
+    backdrop-filter:blur(28px) saturate(200%);
+    -webkit-backdrop-filter:blur(28px) saturate(200%);
+    box-shadow:0 -8px 32px rgba(0,177,201,0.07),0 -1px 0 rgba(0,177,201,0.06),inset 0 1px 0 rgba(255,255,255,0.9);
   }
   .sb.collapsed{width:100%!important}
   .sb-logo{display:none}
@@ -197,5 +199,12 @@ onMounted(() => {
   .sb{height:56px}
   .sb-item{min-width:40px}
   .item-icon{width:22px;height:22px}
+}
+
+/* Dark mode liquid glass nav */
+:global(html.dark) .sb {
+  background: rgba(8,14,16,0.72) !important;
+  border-top: 1px solid rgba(0,177,201,0.18) !important;
+  box-shadow: 0 -8px 32px rgba(0,0,0,0.5), inset 0 1px 0 rgba(0,177,201,0.1) !important;
 }
 </style>

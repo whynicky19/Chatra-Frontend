@@ -402,7 +402,9 @@ onMounted(()=>{ load() })
 .skel-meta{height:11px;width:40%;margin-top:4px}
 
 @media (max-width:768px) {
-  .content-area { padding: 16px 12px 80px; }
+  .pg { overflow-x: hidden; max-width: 100vw; }
+  .pg-body { overflow-x: hidden; max-width: 100%; }
+  .content-area { padding: 16px 12px 80px; overflow-x: hidden; }
   .pg-head { flex-direction: column; align-items: flex-start; gap: 12px; margin-bottom: 20px; }
   .pg-head-left { width: 100%; }
   .pg-head-r { width: 100%; justify-content: flex-start; flex-wrap: wrap; gap: 8px; }
