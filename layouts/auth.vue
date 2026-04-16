@@ -105,21 +105,20 @@ onUnmounted(() => cancelAnimationFrame(animId))
 </script>
 
 <style scoped>
-.auth-shell { position:relative;min-height:100vh;width:100%;display:grid;place-items:center;overflow-x:hidden;background:#f0f8fa }
+.auth-shell { position:relative;width:100%;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:#f0f8fa }
 .auth-canvas { position:absolute;inset:0;width:100%;height:100%;display:block }
 .orb { position:absolute;border-radius:50%;border:1px solid transparent;pointer-events:none;animation:orbit-spin linear infinite }
 .orb-1 { width:500px;height:500px;top:50%;left:50%;transform:translate(-50%,-50%);border-color:rgba(0,177,201,0.12);animation-duration:60s;box-shadow:0 0 60px rgba(0,177,201,0.06) inset }
 .orb-2 { width:800px;height:800px;top:50%;left:50%;transform:translate(-50%,-50%);border-color:rgba(6,182,212,0.08);animation-duration:90s;animation-direction:reverse }
 .orb-3 { width:1100px;height:1100px;top:50%;left:50%;transform:translate(-50%,-50%);border-color:rgba(0,177,201,0.05);animation-duration:130s }
 @keyframes orbit-spin { from{transform:translate(-50%,-50%) rotate(0deg)} to{transform:translate(-50%,-50%) rotate(360deg)} }
-.auth-content { position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:28px;padding:40px 20px;width:100%;max-width:440px;margin:0 auto;animation:content-enter 0.7s cubic-bezier(0.16,1,0.3,1) both }
+.auth-content { position:relative;z-index:10;display:flex;flex-direction:column;align-items:center;gap:28px;padding:24px 20px;width:100%;max-width:440px;overflow-y:auto;max-height:100vh;animation:content-enter 0.7s cubic-bezier(0.16,1,0.3,1) both }
 @keyframes content-enter { from{opacity:0;transform:translateY(24px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
-.auth-brand { display:flex;align-items:center;justify-content:center;animation:brand-enter 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both }
+.auth-brand { display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:brand-enter 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both }
 @keyframes brand-enter { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
 .auth-logo-img { width:180px;height:auto;object-fit:contain }
 
 @media (max-width:768px) {
-  .auth-shell { overflow-x: hidden; }
   .auth-content { padding: 16px; gap: 16px; max-width: 100%; }
   .auth-logo-img { width: 130px; }
   .orb-1 { width: 300px; height: 300px; }

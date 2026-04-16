@@ -26,18 +26,7 @@
           <span class="str-lbl">{{scoreLabel}}</span>
         </div>
       </div>
-      <!-- Gesture verification step — shown before submit button becomes active -->
-      <div class="frow" style="margin-top:4px">
-        <div v-if="!gestureVerified" class="gesture-box">
-          <GestureVerify @verified="gestureVerified=true"/>
-        </div>
-        <div v-else class="gesture-done">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-          Верификация пройдена ✌️
-        </div>
-      </div>
-
-      <button type="submit" class="btn btn-teal w-full btn-lg" :disabled="loading||!canSubmit||!gestureVerified">
+      <button type="submit" class="btn btn-teal w-full btn-lg" :disabled="loading||!canSubmit">
         <div v-if="loading" class="spinner" style="width:15px;height:15px;border-width:2px;border-color:rgba(255,255,255,.3);border-top-color:#fff"></div>
         <span v-else>Зарегистрироваться</span>
       </button>
@@ -60,8 +49,6 @@ const nick = ref(''); const fullname = ref(''); const email = ref(''); const pw 
 const emailTouched = ref(false)
 const emailOk = computed(() => /^[^\s@]+@(gmail\.com|icloud\.com)$/.test(email.value.trim()))
 const onEmailInput = () => { emailTouched.value = true }
-const gestureVerified = ref(false)
-
 const fullnameOk = computed(() => fullname.value.trim().split(' ').filter(Boolean).length >= 2)
 const canSubmit = computed(() => fullnameOk.value && emailOk.value && pw.value.length>=6)
 

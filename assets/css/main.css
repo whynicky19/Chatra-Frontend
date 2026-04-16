@@ -207,8 +207,8 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Outfit', sans-serif; }
 /* ====== MOBILE ====== */
 @media (max-width: 768px) {
   html { font-size: 14px; }
-  body { overflow-x: hidden; }
-  #__nuxt { overflow-x: hidden; }
+  body { overflow-x: hidden; overflow-y: hidden; }
+  #__nuxt { overflow-x: hidden; overflow-y: hidden; }
 
   /* Full-screen modal on mobile — bottom sheet */
   .overlay { padding: 0; align-items: flex-end; }
