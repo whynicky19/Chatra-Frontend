@@ -74,7 +74,7 @@ const sub = async () => {
 }
 </script>
 <style scoped>
-.auth-card{background:#ffffff;border:1px solid rgba(0,177,201,0.2);border-radius:var(--r-2xl);padding:32px;width:100%;max-width:420px;box-shadow:0 8px 40px rgba(0,120,140,0.12)}
+.auth-card{background:#ffffff;border:1px solid rgba(0,177,201,0.2);border-radius:var(--r-2xl);padding:32px;width:100%;max-width:420px;margin:0 auto;box-shadow:0 8px 40px rgba(0,120,140,0.12)}
 .auth-title{font-size:20px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px;color:#0d2d33}
 .auth-sub{font-size:14px;color:#4a7a86;margin-bottom:24px}
 .auth-form{display:flex;flex-direction:column;gap:0}
@@ -94,14 +94,15 @@ const sub = async () => {
 .gesture-done{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--green-l);border:1px solid var(--green);border-radius:var(--r-md);font-size:13px;font-weight:600;color:var(--green)}
 
 @media (max-width:768px) {
-  .auth-card { padding: 24px 16px 28px; border-radius: var(--r-xl); max-width: 100%; }
+  .auth-card { padding: 20px 14px 24px; border-radius: var(--r-xl); max-width: 100%; width: 100%; box-shadow: none; border: 1px solid rgba(0,177,201,0.15); }
   .auth-title { font-size: 18px; }
+  .auth-sub { margin-bottom: 16px; font-size: 13px; }
+  .auth-form { gap: 0; }
   .input { font-size: 16px !important; }
-  .btn-lg { min-height: 48px; }
-  .role-grid { gap: 6px; }
-  .role-btn { padding: 10px 6px; font-size: 12px; }
+  .btn-lg { min-height: 50px; font-size: 15px; }
+  .frow { margin-bottom: 12px; }
 }
 @media (max-width:480px) {
-  .auth-card { padding: 20px 12px 24px; }
+  .auth-card { padding: 16px 12px 20px; }
 }
 </style>

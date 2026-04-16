@@ -187,12 +187,16 @@ onUnmounted(()=>{if(import.meta.client)window.removeEventListener('resize',_resi
   .mobile-chat .chat-list-panel{display:none}
   .mobile-chat .chat-main{display:flex;width:100%}
   .clp-head{padding:14px 12px 8px}
+  .clp-head .btn-icon{min-width:44px;min-height:44px}
   .clp-title{font-size:18px}
-  .chat-item{margin:1px 4px;min-height:56px}
+  .chat-item{margin:1px 4px;min-height:60px;padding:12px}
   .chat-name{font-size:15px}
   .chat-preview{font-size:12px}
   .search-inp{font-size:16px}
   .av-img{width:40px;height:40px}
+  .sr-btn{width:44px;height:44px}
+  .sr-item{min-height:56px;padding:12px 14px}
+  .search-clear{min-width:32px;min-height:32px;font-size:20px}
 }
 @media (max-width:480px){
   .clp-head{padding:12px 10px 6px}

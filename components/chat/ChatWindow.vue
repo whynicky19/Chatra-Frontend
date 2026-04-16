@@ -348,9 +348,15 @@ watch(() => chatsStore.activeMsgs.length, () => scrollBottom())
 .back-btn{margin-right:4px;flex-shrink:0}
 .cw-head{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:60px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--surface)}
 @media (max-width:768px){
-  .cw-head{padding:0 12px}
-  .cw-head-r{gap:2px}
-  .inp-row{padding:8px 12px;gap:8px}
+  .cw-head{padding:0 10px;height:56px}
+  .cw-head-r{gap:0}
+  .cw-head-r .btn-icon{min-width:44px;min-height:44px}
+  .back-btn{min-width:44px;min-height:44px}
+  .inp-row{padding:8px 10px;gap:6px}
+  .emoji-btn{width:44px;height:44px}
+  .attach-icon{width:44px;height:44px}
+  .send-btn{width:44px;height:44px}
+  .msg-inp{font-size:16px}
   .cw-name{font-size:14px}
   .cw-role{display:none}
 }

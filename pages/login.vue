@@ -48,7 +48,7 @@ const sub = async () => {
 }
 </script>
 <style scoped>
-.auth-card{background:#ffffff;border:1px solid rgba(0,177,201,0.2);border-radius:var(--r-2xl);padding:36px;width:100%;box-shadow:0 8px 40px rgba(0,120,140,0.12),0 2px 8px rgba(0,120,140,0.08)}
+.auth-card{background:#ffffff;border:1px solid rgba(0,177,201,0.2);border-radius:var(--r-2xl);padding:36px;width:100%;max-width:420px;margin:0 auto;box-shadow:0 8px 40px rgba(0,120,140,0.12),0 2px 8px rgba(0,120,140,0.08)}
 .auth-title{font-size:22px;font-weight:800;margin-bottom:4px;color:#0d2d33}
 .auth-sub{font-size:14px;color:#4a7a86;margin-bottom:26px}
 .auth-form{display:flex;flex-direction:column}
@@ -67,10 +67,12 @@ const sub = async () => {
 .input-err:focus{border-color:#f87171!important;box-shadow:0 0 0 3px rgba(239,68,68,0.12)!important}
 
 @media (max-width:768px) {
-  .auth-card { padding: 24px 16px 28px; border-radius: var(--r-xl); }
+  .auth-card { padding: 20px 14px 24px; border-radius: var(--r-xl); width: 100%; max-width: 100%; box-shadow: none; border: 1px solid rgba(0,177,201,0.15); }
   .auth-title { font-size: 20px; }
+  .auth-sub { margin-bottom: 18px; }
+  .frow { margin-bottom: 12px; }
   .input { font-size: 16px !important; }
-  .btn-lg { min-height: 48px; font-size: 15px; }
+  .btn-lg { min-height: 50px; font-size: 15px; }
   .pw-eye { min-width: 44px; min-height: 44px; right: 0; }
 }
 @media (max-width:480px) {

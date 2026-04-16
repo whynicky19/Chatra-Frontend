@@ -414,8 +414,8 @@ onMounted(()=>{ load() })
   .skel-cover { height: 160px; }
   .add-card { min-height: 120px; }
   .add-card-inner { padding: 24px 16px; }
-  .ctrl-btn { width: 36px; height: 36px; }
-  .card-action-btn { font-size: 14px; min-height: 36px; }
+  .ctrl-btn { width: 44px; height: 44px; border-radius: var(--r-md); }
+  .card-action-btn { font-size: 14px; min-height: 44px; padding: 0 4px; }
   .code-box { width: 40px; height: 48px; font-size: 18px; }
   .code-boxes { gap: 6px; }
   .join-modal { max-width: 100%; }

@@ -13,7 +13,7 @@
             <h2 class="scard-title">{{ t('settings.profile_details') }}</h2>
             <p class="scard-sub">{{ t('settings.profile_sub') }}</p>
           </div>
-          <button class="btn btn-teal btn-lg" @click="saveProfile">{{ t('settings.save') }}</button>
+          <button class="btn btn-teal btn-lg save-btn-desktop" @click="saveProfile">{{ t('settings.save') }}</button>
         </div>
         <div class="profile-form">
           <label class="avatar-upload-area" title="Upload photo">
@@ -47,6 +47,7 @@
             </div>
           </div>
         </div>
+        <button class="btn btn-teal btn-lg save-btn-mobile" @click="saveProfile">{{ t('settings.save') }}</button>
       </div>
 
       <!-- Preferences row (no appearance) -->
@@ -189,23 +190,27 @@ onMounted(() => {
 .deactivate-sub{font-size:13px;color:var(--text4);margin-top:2px}
 .deactivate-btn{color:var(--red);font-size:14px;font-weight:600;background:none;border:none;cursor:pointer;flex-shrink:0}
 .deactivate-btn:hover{opacity:.7}
+.save-btn-mobile { display: none; }
 @media (max-width:768px){
-  .pg { overflow-x: hidden; }
+  .pg { overflow-x: hidden; overflow-y: auto; }
   .pg-head { padding: 16px 14px 0; }
   .pg-title { font-size: 22px; }
-  .pg-body{padding:12px 12px 80px;gap:14px}
-  .scard{padding:16px}
-  .scard-head{flex-direction:column;gap:12px;margin-bottom:16px}
-  .scard-head .btn-lg{width:100%;min-height:48px}
-  .profile-form{flex-direction:column;align-items:center;gap:16px}
-  .fields-grid{grid-template-columns:1fr;gap:12px}
+  .pg-body { padding: 12px 12px 80px; gap: 14px; }
+  .scard { padding: 16px; }
+  .scard-head { flex-direction: column; gap: 12px; margin-bottom: 16px; }
+  .save-btn-desktop { display: none; }
+  .save-btn-mobile { display: flex; width: 100%; min-height: 50px; margin-top: 16px; }
+  .profile-form { flex-direction: column; align-items: center; gap: 16px; }
+  .fields-grid { grid-template-columns: 1fr; gap: 12px; }
+  .two-col-row { grid-template-columns: 1fr; gap: 14px; }
   .field-input { font-size: 16px; }
   .input { font-size: 16px !important; }
-  .pref-row { padding: 16px 0; }
+  .pref-row { padding: 16px 0; min-height: 60px; }
   .deactivate-card { flex-wrap: wrap; gap: 12px; }
-  .deactivate-btn { min-height: 44px; }
+  .deactivate-btn { min-height: 44px; min-width: 44px; }
   .theme-btns { gap: 8px; }
-  .theme-choice { padding: 14px 8px; font-size: 12px; }
+  .theme-choice { padding: 14px 8px; font-size: 12px; min-height: 80px; }
+  .toggle { min-height: 44px; min-width: 44px; justify-content: flex-end; }
 }
 @media (max-width:480px){
   .pg-head { padding: 12px 12px 0; }
