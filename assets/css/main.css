@@ -183,7 +183,7 @@ html.dark ::-webkit-scrollbar-thumb:hover{background:rgba(0,177,201,.4)}
 .spinner{width:22px;height:22px;border:2.5px solid var(--border2);border-top-color:var(--teal);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
 
 /* ====== TOGGLE ====== */
-.toggle{position:relative;display:inline-flex;align-items:center;cursor:pointer}
+.toggle{position:relative;display:inline-flex;align-items:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .toggle input{opacity:0;width:0;height:0;position:absolute}
 .tog-t{width:42px;height:24px;background:var(--surface3);border:1px solid var(--border);border-radius:100px;position:relative;transition:all .2s;flex-shrink:0}
 .tog-t::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:all .22s cubic-bezier(.34,1.56,.64,1);box-shadow:0 1px 4px rgba(0,0,0,.2)}
@@ -222,20 +222,17 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Outfit', sans-serif; }
   body { overflow: hidden; }
   #__nuxt { overflow: hidden; }
 
-  /* Full-screen modal on mobile — bottom sheet with liquid glass */
-  .overlay { padding: 0; align-items: flex-end; background: rgba(0,20,26,0.45); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+  /* Full-screen modal on mobile — bottom sheet */
+  .overlay { padding: 0; align-items: flex-end; background: rgba(0,20,26,0.6); }
   .modal {
     border-radius: var(--r-2xl) var(--r-2xl) 0 0;
     max-width: 100%;
     max-height: 92vh;
     overflow-y: auto;
     padding: 20px 16px 32px;
-    background: rgba(248,252,253,0.88);
-    backdrop-filter: blur(40px) saturate(200%);
-    -webkit-backdrop-filter: blur(40px) saturate(200%);
-    border: 1px solid rgba(255,255,255,0.7);
-    border-bottom: none;
-    box-shadow: 0 -16px 64px rgba(0,177,201,0.1), inset 0 1px 0 rgba(255,255,255,0.95);
+    background: var(--surface);
+    border: none;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.15);
   }
 
   /* Larger touch targets — min 44×44px */

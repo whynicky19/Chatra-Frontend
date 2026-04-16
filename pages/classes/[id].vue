@@ -901,11 +901,6 @@ onMounted(async () => {
   .cd-page { overflow-x: hidden; max-width: 100vw; }
   .cd-topbar{
     padding:0 12px;
-    background:rgba(240,248,250,0.78);
-    backdrop-filter:blur(24px) saturate(200%);
-    -webkit-backdrop-filter:blur(24px) saturate(200%);
-    border-bottom:1px solid rgba(255,255,255,0.6);
-    box-shadow:0 2px 16px rgba(0,177,201,0.06),inset 0 -1px 0 rgba(0,177,201,0.08);
   }
   .topbar-breadcrumb{max-width:160px;overflow:hidden}
   .cd-sidebar{display:none}
@@ -913,11 +908,6 @@ onMounted(async () => {
   .cd-main{overflow-x:hidden;max-width:100%}
   .tabs-wrap{
     overflow:hidden;
-    background:rgba(248,252,253,0.75);
-    backdrop-filter:blur(20px) saturate(180%);
-    -webkit-backdrop-filter:blur(20px) saturate(180%);
-    border-bottom:1px solid rgba(255,255,255,0.5);
-    box-shadow:0 2px 12px rgba(0,177,201,0.05),inset 0 -1px 0 rgba(0,177,201,0.07);
   }
   .tabs-bar{padding:0;overflow-x:hidden;flex-wrap:nowrap}
   .tab-btn{flex:1;justify-content:center;padding:12px 4px;font-size:11px;white-space:nowrap;min-width:0}
@@ -948,17 +938,4 @@ onMounted(async () => {
   .page-title{font-size:18px}
 }
 
-/* Dark mode liquid glass */
-@media (max-width:768px) {
-  :global(html.dark) .cd-topbar {
-    background: rgba(8,14,16,0.78);
-    border-bottom: 1px solid rgba(0,177,201,0.15);
-    box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 -1px 0 rgba(0,177,201,0.1);
-  }
-  :global(html.dark) .tabs-wrap {
-    background: rgba(8,14,16,0.72);
-    border-bottom: 1px solid rgba(0,177,201,0.12);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.3), inset 0 -1px 0 rgba(0,177,201,0.08);
-  }
-}
 </style>
