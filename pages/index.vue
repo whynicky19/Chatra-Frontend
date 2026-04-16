@@ -255,12 +255,12 @@ const toggleTheme = () => {
   isDark.value = !isDark.value
   if (import.meta.client) {
     document.documentElement.classList.toggle('dark', isDark.value)
-    localStorage.setItem('_theme', isDark.value ? 'dark' : 'light')
+    localStorage.setItem('theme', isDark.value ? 'dark' : 'light')
   }
 }
 onMounted(() => {
   if (import.meta.client) {
-    isDark.value = document.documentElement.classList.contains('dark') || localStorage.getItem('_theme') === 'dark'
+    isDark.value = document.documentElement.classList.contains('dark') || localStorage.getItem('theme') === 'dark'
   }
 })
 
