@@ -433,7 +433,7 @@ watch(() => auth.user?.id, (newId) => { if (newId) loadJoined() })
 .btn-outline-teal:hover{background:var(--teal-l)}
 
 /* Theme toggle */
-.head-lang-switch{display:flex;align-items:center;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:30px;padding:3px}
+.head-lang-switch{display:none;align-items:center;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:30px;padding:3px}
 .head-lang-btn{padding:4px 11px;border-radius:24px;font-size:11px;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:all .15s;background:none;border:none;color:var(--text4)}
 .head-lang-btn:hover{color:var(--teal)}
 .head-lang-btn.active{background:var(--teal);color:#fff;box-shadow:0 2px 6px rgba(0,177,201,0.3)}
@@ -541,6 +541,7 @@ watch(() => auth.user?.id, (newId) => { if (newId) loadJoined() })
   .pg-head-r{width:100%;justify-content:flex-start;flex-wrap:wrap;gap:8px}
   .pg-title{font-size:22px;text-align:left}
   .pg-sub{text-align:left;margin:0}
+  .head-lang-switch{display:flex}
   .btn-outline-teal{min-height:44px}
   .classes-grid{grid-template-columns:1fr;gap:14px}
   .card-cover{height:160px}
