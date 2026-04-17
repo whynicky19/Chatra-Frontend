@@ -88,8 +88,18 @@ import { useAuthStore } from '~/stores/auth.store'
 import { useChatsStore } from '~/stores/chats.store'
 import { useAuth } from '~/composables/useAuth'
 import { useI18n } from '~/composables/useI18n'
+import { useAi, AI_LIMIT } from '~/composables/useAi'
 const auth = useAuthStore(); const chatsStore = useChatsStore(); const { logout } = useAuth(); const route = useRoute()
 const { t, lang, setLang } = useI18n()
+const ai = useAi()
+const showAiQuota = computed(() => auth.user?.role === 'student' && !auth.user?.ai_unlimited)
+const aiRemaining = computed(() => ai.aiRemaining.value)
+const aiLimitReached = computed(() => ai.aiLimitReached.value)
+const aiQuotaColor = computed(() => {
+  if (aiLimitReached.value) return 'red'
+  if (aiRemaining.value <= 2) return 'yellow'
+  return 'teal'
+})
 const totalUnread = computed(() => chatsStore.totalUnread)
 const doLogout = () => { chatsStore.disconnectAll(); logout() }
 
@@ -134,6 +144,14 @@ onMounted(() => {
 .help-item{color:var(--text4)}
 .logout-item{color:var(--text4)}
 .logout-item:hover{background:var(--red-l)!important;color:var(--red)!important}
+.ai-quota-pill{font-size:10px;font-weight:800;padding:2px 7px;border-radius:100px;flex-shrink:0;margin-left:auto}
+.ai-quota-pill.teal{background:rgba(0,177,201,.15);color:var(--teal)}
+.ai-quota-pill.yellow{background:rgba(245,158,11,.15);color:#b45309}
+.ai-quota-pill.red{background:var(--red-l);color:var(--red)}
+.ai-quota-dot{position:absolute;top:-4px;right:-4px;width:8px;height:8px;border-radius:50%;border:2px solid var(--surface)}
+.ai-quota-dot.teal{background:var(--teal)}
+.ai-quota-dot.yellow{background:#f59e0b}
+.ai-quota-dot.red{background:var(--red)}
 .fio-nudge{display:flex;align-items:center;gap:8px;margin:0 6px 8px;padding:10px 12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:var(--r-md);font-size:12px;font-weight:600;color:#b45309;cursor:pointer;transition:background .15s;}
 .fio-nudge:hover{background:rgba(245,158,11,.18);}
 

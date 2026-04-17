@@ -283,8 +283,16 @@
               <div v-else class="spinner" style="width:12px;height:12px;border-width:2px;border-color:rgba(255,255,255,.3);border-top-color:#fff"></div>
               {{ bulkGrading ? `Проверяю ${bulkDone}/${bulkTotal}...` : `⚡ Проверить все ожидающие (${submissions.filter(s=>s.status==='submitted'||s.status==='late').length})` }}
             </button>
+            <div class="subs-search">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input v-model="searchQuery" class="subs-search-inp" type="text" placeholder="Поиск по ФИО студента..." />
+              <button v-if="searchQuery" class="subs-search-clear" @click="searchQuery = ''">×</button>
+            </div>
+            <div v-if="filteredSubmissions.length === 0 && searchQuery" class="empty-block" style="padding:20px">
+              Студент не найден
+            </div>
             <div class="subs-list">
-              <div v-for="s in submissions" :key="s.id" class="sub-row" @click="activeSub = s">
+              <div v-for="s in filteredSubmissions" :key="s.id" class="sub-row" @click="activeSub = s">
                 <div class="sub-av">{{ getStudentInitials(s.student_id) }}</div>
                 <div class="sub-info">
                   <div class="sub-student">{{ getStudentName(s.student_id) }}</div>
@@ -332,6 +340,7 @@ const toast = useToast()
 const studentMap = ref<Record<number, string>>({})
 
 const tab = ref<'info'|'submit'|'submissions'>('info')
+const searchQuery = ref('')
 const mySubmission = ref<Submission|null>(null)
 const assignmentVariants = ref<Variant[]>([])
 const submissions = ref<Submission[]>([])
@@ -350,6 +359,15 @@ const submittedFiles = ref<File[]>([])
 const uploadIdxSub = ref(0)
 const uploadPctSub = ref(0)
 const form = ref({ text: '', file: null as File|null, variantNumber: null as number|null })
+
+const filteredSubmissions = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  if (!q) return submissions.value
+  return submissions.value.filter(s => {
+    const name = (studentMap.value[s.student_id] || '').toLowerCase()
+    return name.includes(q)
+  })
+})
 
 const parsedCriteria = computed(() => { try { return JSON.parse(props.assignment.criteria) } catch { return [] } })
 const parsedCriteriaScores = computed(() => { if (!mySubmission.value?.grade?.criteria_scores) return null; try { return JSON.parse(mySubmission.value.grade.criteria_scores) } catch { return null } })
@@ -417,6 +435,7 @@ const onFileSelect = (e: Event) => {
 
 const loadSubs = async () => {
   if (loadingSubs.value) return
+  searchQuery.value = ''
   loadingSubs.value = true
   try {
     const [subs, users] = await Promise.all([
@@ -645,6 +664,12 @@ onMounted(async () => {
 .stat-l { font-size: 11px; color: var(--text4); font-weight: 600; }
 .stat-chip.ok .stat-n { color: var(--green); }
 .stat-chip.wait .stat-n { color: var(--yellow); }
+.subs-search { display: flex; align-items: center; gap: 8px; padding: 8px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-md); margin-bottom: 10px; }
+.subs-search svg { color: var(--text4); flex-shrink: 0; }
+.subs-search-inp { flex: 1; background: transparent; border: none; outline: none; font-size: 13px; color: var(--text1); font-family: inherit; }
+.subs-search-inp::placeholder { color: var(--text4); }
+.subs-search-clear { background: none; border: none; color: var(--text4); font-size: 16px; cursor: pointer; line-height: 1; padding: 0 2px; transition: color .15s; }
+.subs-search-clear:hover { color: var(--text1); }
 .subs-list { display: flex; flex-direction: column; gap: 6px; }
 .sub-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-lg); cursor: pointer; transition: all .15s; }
 .sub-row:hover { background: var(--surface3); border-color: var(--border2); }

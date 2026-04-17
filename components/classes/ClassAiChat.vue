@@ -124,13 +124,23 @@
       </div>
     </div>
 
+    <!-- ── Quota bar (students only) ── -->
+    <div v-if="aiLimitReached" class="quota-bar exhausted">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      Лимит запросов исчерпан ({{ AI_LIMIT }}/{{ AI_LIMIT }}). Обратитесь к администратору.
+    </div>
+    <div v-else-if="isStudent" class="quota-bar" :class="{ warn: aiRemaining <= 2 }">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      Осталось запросов к ИИ: <strong>{{ aiRemaining }} / {{ AI_LIMIT }}</strong>
+    </div>
+
     <!-- ── Input ── -->
     <div class="ai-input-bar">
       <textarea ref="inputEl" v-model="inputTxt" class="ai-textarea"
-        placeholder="Спросите про материалы, попросите объяснить тему..."
-        rows="1" @keydown.enter.exact.prevent="send" @input="autoResize">
+        :placeholder="aiLimitReached ? 'Лимит запросов исчерпан...' : 'Спросите про материалы, попросите объяснить тему...'"
+        rows="1" :disabled="aiLimitReached" @keydown.enter.exact.prevent="send" @input="autoResize">
       </textarea>
-      <button class="send-btn" :disabled="!inputTxt.trim() || loading" @click="send">
+      <button class="send-btn" :disabled="!inputTxt.trim() || loading || aiLimitReached" @click="send">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2L15 22 11 13 2 9l20-7z"/></svg>
       </button>
     </div>
@@ -144,6 +154,7 @@ import { useAssignmentsSvc } from '~/services/assignments'
 import { useUsersSvc } from '~/services/users'
 import { useToast } from '~/composables/useToast'
 import { useApi } from '~/services/api'
+import { useAi, incrementAiCount, AI_LIMIT } from '~/composables/useAi'
 import type { Submission } from '~/services/assignments'
 
 // ── Props ────────────────────────────────────────────────────────────────────
@@ -165,6 +176,10 @@ const svc = useAssignmentsSvc()
 const usersSvc = useUsersSvc()
 const toast = useToast()
 const api = useApi()
+const aiQuota = useAi()
+const aiLimitReached = computed(() => aiQuota.aiLimitReached.value)
+const aiRemaining = computed(() => aiQuota.aiRemaining.value)
+const isStudent = computed(() => auth.user?.role === 'student' && !auth.user?.ai_unlimited)
 
 const studentMap = ref<Record<number, string>>({})
 
@@ -529,6 +544,11 @@ const send = async () => {
   const text = inputTxt.value.trim()
   if (!text || loading.value) return
 
+  if (aiLimitReached.value) {
+    toast.err(`Лимит ИИ исчерпан (${AI_LIMIT} запросов). Обратитесь к администратору.`)
+    return
+  }
+
   inputTxt.value = ''
   if (inputEl.value) inputEl.value.style.height = 'auto'
 
@@ -555,6 +575,9 @@ const send = async () => {
     msgs.value.push({ id: ++nextId, role: 'assistant', text: reply })
     scrollBottom()
     persist()
+    if (auth.user?.role === 'student' && !auth.user.ai_unlimited) {
+      incrementAiCount(auth.user.id)
+    }
   } catch (e: any) {
     toast.err('ИИ: ' + (e?.response?.data?.detail || e.message || 'ошибка соединения'))
   } finally {
@@ -660,6 +683,11 @@ onMounted(() => {
 .typing-bbl span:nth-child(2) { animation-delay: .14s; }
 .typing-bbl span:nth-child(3) { animation-delay: .28s; }
 @keyframes bounce { 0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-6px)} }
+
+/* Quota bar */
+.quota-bar { display: flex; align-items: center; gap: 7px; padding: 7px 18px; font-size: 12px; color: var(--teal); background: rgba(0,177,201,.07); border-top: 1px solid rgba(0,177,201,.12); flex-shrink: 0; }
+.quota-bar.warn { color: #b45309; background: rgba(245,158,11,.07); border-top-color: rgba(245,158,11,.15); }
+.quota-bar.exhausted { color: var(--red); background: var(--red-l); border-top-color: rgba(248,113,113,.2); }
 
 /* Input bar */
 .ai-input-bar { display: flex; align-items: flex-end; gap: 10px; padding: 12px 18px; background: var(--surface); border-top: 1px solid var(--border); flex-shrink: 0; }

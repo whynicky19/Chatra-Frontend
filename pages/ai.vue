@@ -115,6 +115,16 @@
         </div>
       </div>
 
+      <!-- Quota bar for students -->
+      <div v-if="ai.aiLimitReached.value" class="quota-bar exhausted">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Лимит запросов исчерпан ({{ ai.AI_LIMIT }}/{{ ai.AI_LIMIT }}). Обратитесь к администратору.
+      </div>
+      <div v-else-if="!ai.aiUnlimited.value && auth.user?.role === 'student'" class="quota-bar" :class="{ warn: ai.aiRemaining.value <= 2 }">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Осталось запросов к ИИ: <strong>{{ ai.aiRemaining.value }} / {{ ai.AI_LIMIT }}</strong>
+      </div>
+
       <!-- File preview bar -->
       <div v-if="pendingFile" class="file-prev">
         <div class="fp-info">
@@ -137,13 +147,13 @@
           ref="inp"
           v-model="txt"
           class="chat-field"
-          placeholder="Написать сообщение или спросить кое что..."
-          :disabled="loading"
+          :placeholder="ai.aiLimitReached.value ? 'Лимит запросов исчерпан...' : 'Написать сообщение или спросить кое что...'"
+          :disabled="loading || ai.aiLimitReached.value"
           @keydown.enter="send"
         />
         <button
-          :class="['send-btn', {active: txt.trim() || pendingFile}]"
-          :disabled="(!txt.trim() && !pendingFile) || loading"
+          :class="['send-btn', {active: (txt.trim() || pendingFile) && !ai.aiLimitReached.value}]"
+          :disabled="(!txt.trim() && !pendingFile) || loading || ai.aiLimitReached.value"
           @click="send"
         >
           <div v-if="loading" class="spinner" style="width:14px;height:14px;border-width:2px;border-color:rgba(255,255,255,.3);border-top-color:#fff"></div>
@@ -158,10 +168,12 @@
 import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { useAi } from '~/composables/useAi'
 import { useI18n } from '~/composables/useI18n'
+import { useAuthStore } from '~/stores/auth.store'
 
 definePageMeta({ layout: 'default' })
 
 const ai = useAi()
+const auth = useAuthStore()
 const { t, lang } = useI18n()
 const msgs = computed(() => ai.msgs.value)
 const loading = computed(() => ai.loading.value)
@@ -427,6 +439,9 @@ onMounted(() => {
 .typing span:nth-child(3) { animation-delay: .4s }
 
 /* File preview bar */
+.quota-bar { display: flex; align-items: center; gap: 7px; padding: 8px 24px; font-size: 12px; color: var(--teal); background: rgba(0,177,201,.07); border-top: 1px solid rgba(0,177,201,.12); flex-shrink: 0; position: relative; z-index: 2 }
+.quota-bar.warn { color: #f59e0b; background: rgba(245,158,11,.07); border-top-color: rgba(245,158,11,.15) }
+.quota-bar.exhausted { color: var(--red); background: var(--red-l); border-top-color: rgba(248,113,113,.2) }
 .file-prev { display: flex; align-items: center; justify-content: space-between; padding: 8px 24px; background: rgba(0,177,201,.08); border-top: 1px solid rgba(0,177,201,.12); font-size: 13px; font-weight: 500; color: var(--teal); position: relative; z-index: 2; flex-shrink: 0 }
 .fp-info { display: flex; align-items: center; gap: 10px }
 .fp-thumb { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; border: 1px solid rgba(0,177,201,.2) }

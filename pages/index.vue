@@ -31,7 +31,7 @@
           </div>
         </div>
 
-        <!-- Grid -->
+
         <div class="classes-grid">
           <div v-if="loading" style="grid-column:1/-1;display:flex;justify-content:center;padding:60px">
             <div class="spinner" style="width:28px;height:28px;border-width:3px"></div>
@@ -47,22 +47,21 @@
           </div>
 
           <template v-else>
-            <!-- Class cards -->
+
             <div v-for="cls in visibleClasses" :key="cls.id" class="class-card" @click="goClass(cls.id)">
-              <!-- Cover image -->
               <div class="card-cover" :style="cls.cover_image ? {backgroundImage:`url(${cls.cover_image})`,backgroundSize:'cover',backgroundPosition:'center'} : {background: coverGrad(cls.id)}">
-                <!-- Code chip for teachers — grey -->
+
                 <div v-if="auth.isTeacher || auth.isAdmin" class="card-code-chip" @click.stop="copyClassCode(cls.id)">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                   {{ codeFor(cls.id) }}
                 </div>
-                <!-- Edit button for teachers -->
+
                 <button v-if="auth.isTeacher || auth.isAdmin" class="card-edit-btn" @click.stop="openEditClass(cls)" title="Редактировать">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </button>
               </div>
 
-              <!-- Card body -->
+
               <div class="card-body">
                 <div class="card-title-row">
                   <h3 class="card-name">{{ cls.title }}</h3>
@@ -71,7 +70,7 @@
                   </div>
                 </div>
                 <p class="card-desc">{{ cls.description || (lang==='ru' ? 'Нажмите для просмотра' : lang==='kk' ? 'Көру үшін басыңыз' : 'Click to view') }}</p>
-                <!-- Teacher name -->
+
                 <div class="card-teacher" v-if="cls.teacher_name || cls.teacher">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                   {{ cls.teacher_name || cls.teacher }}
@@ -101,7 +100,7 @@
               </div>
             </div>
 
-            <!-- Add new class card — STUDENTS ONLY -->
+
             <div v-if="!auth.isTeacher && !auth.isAdmin" class="class-card add-card" @click="showJoin=true">
               <div class="add-card-inner">
                 <div class="add-plus">
@@ -114,7 +113,7 @@
           </template>
         </div>
 
-        <!-- Upcoming deadlines -->
+
         <div v-if="upcomingAssignments.length" class="deadlines-section">
           <div class="deadlines-label">{{ t('classes.upcoming') }}</div>
           <div class="deadlines-list">
@@ -132,10 +131,10 @@
       </div>
     </div>
 
-    <!-- Create modal -->
+
     <CreateClassModal v-if="showCreate" @close="showCreate=false" @created="onCreated"/>
 
-    <!-- Edit class modal -->
+
     <div v-if="editingClass" class="overlay" @click.self="editingClass=null">
       <div class="modal anim-scale edit-class-modal">
         <div class="modal-head">
@@ -145,7 +144,7 @@
           </button>
         </div>
         <div class="edit-form">
-          <!-- Cover image preview -->
+
           <div class="edit-cover-preview" :style="editForm.cover_image ? {backgroundImage:`url(${editForm.cover_image})`,backgroundSize:'cover',backgroundPosition:'center'} : {background: coverGrad(editingClass.id)}">
             <label class="edit-cover-btn">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -176,7 +175,7 @@
       </div>
     </div>
 
-    <!-- Join by code modal -->
+
     <div v-if="showJoin" class="overlay" @click.self="showJoin=false">
       <div class="modal anim-scale join-modal">
         <div class="modal-head">

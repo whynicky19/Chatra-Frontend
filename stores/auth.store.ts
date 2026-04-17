@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-interface User { id: number; email: string; is_active: boolean; role: string }
+interface User { id: number; email: string; is_active: boolean; role: string; ai_unlimited?: boolean }
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({

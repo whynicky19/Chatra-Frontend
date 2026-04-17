@@ -30,6 +30,10 @@ export const useAdminSvc = () => {
       await api.delete(`/admin/users/${id}`)
     },
 
+    setAiUnlimited: async (id: number, unlimited: boolean) => {
+      await api.put(`/admin/users/${id}/ai_unlimited`, { unlimited })
+    },
+
     aiUsage: async (params?: { class_id?: number; page?: number; page_size?: number }) => {
       const { data } = await api.get('/admin/ai-usage', { params })
       return data as { total: number; page: number; page_size: number; items: any[] }

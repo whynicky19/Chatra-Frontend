@@ -50,7 +50,7 @@
         <div v-if="loadingU" style="display:flex;justify-content:center;padding:24px"><div class="spinner"></div></div>
         <div v-else class="users-table">
           <table>
-            <thead><tr><th>Имя</th><th>Email</th><th>Роль</th><th>Дата регистрации</th><th></th></tr></thead>
+            <thead><tr><th>Имя</th><th>Email</th><th>Роль</th><th>ИИ доступ</th><th>Дата регистрации</th><th></th></tr></thead>
             <tbody>
               <tr v-for="u in fUsers" :key="u.id">
                 <td>
@@ -62,6 +62,24 @@
                 <td style="font-size:13px;color:var(--text3)">{{u.email}}</td>
                 <td>
                   <span :class="['badge',u.role==='admin'?'badge-blue':'badge-gray']">{{u.role}}</span>
+                </td>
+                <td>
+                  <div v-if="u.role==='student'" style="display:flex;align-items:center;gap:6px">
+                    <span :class="['ai-quota-badge', u.ai_unlimited ? 'unlimited' : 'limited']">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                      {{ u.ai_unlimited ? 'Безлимит' : '5 запросов' }}
+                    </span>
+                    <button
+                      :class="['btn btn-sm', u.ai_unlimited ? 'btn-ghost' : 'btn-blue']"
+                      :disabled="togglingAi[u.id]"
+                      style="font-size:11px;padding:3px 8px"
+                      @click="toggleAiUnlimited(u)"
+                    >
+                      <div v-if="togglingAi[u.id]" class="spinner" style="width:10px;height:10px;border-width:2px;border-color:rgba(255,255,255,.3);border-top-color:#fff"></div>
+                      <span v-else>{{ u.ai_unlimited ? 'Ограничить' : 'Разрешить' }}</span>
+                    </button>
+                  </div>
+                  <span v-else style="font-size:12px;color:var(--text4)">—</span>
                 </td>
                 <td style="font-size:12px;color:var(--text4)">{{today}}</td>
                 <td>
@@ -83,7 +101,7 @@
                   </div>
                 </td>
               </tr>
-              <tr v-if="!fUsers.length"><td colspan="5" style="text-align:center;padding:24px;color:var(--text4);font-size:13px">Пользователи не найдены</td></tr>
+              <tr v-if="!fUsers.length"><td colspan="6" style="text-align:center;padding:24px;color:var(--text4);font-size:13px">Пользователи не найдены</td></tr>
             </tbody>
           </table>
         </div>
@@ -239,6 +257,7 @@ const auth = useAuthStore(); const toast = useToast(); const adminSvc = useAdmin
 const { t, lang } = useI18n()
 const chatsSvc = useChatsSvc(); const postsSvc = usePostsSvc()
 const tab = ref('users'); const users = ref<any[]>([]); const loadingU = ref(false); const sq = ref(''); const showCreate = ref(false); const crU = ref(false)
+const togglingAi = ref<Record<number, boolean>>({})
 const nu = ref({ e: '', p: '', r: 'student' }); const chatsCount = ref(0); const classesCount = ref(0)
 const today = new Date().toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.')
 const avColors = ['bg-b0', 'bg-b1', 'bg-b2', 'bg-b3', 'bg-b4', 'bg-b5']
@@ -262,6 +281,17 @@ const setClassFilter = (classId: number | null) => { aiFilterClass.value = aiFil
 const switchToAiUsage = () => { tab.value = 'ai-usage'; if (!aiLogs.value.length && !aiLoading.value) loadAiUsage(1) }
 
 // ── User actions ──────────────────────────────────────────────────────────────
+const toggleAiUnlimited = async (u: any) => {
+  togglingAi.value = { ...togglingAi.value, [u.id]: true }
+  const newVal = !u.ai_unlimited
+  try {
+    await adminSvc.setAiUnlimited(u.id, newVal)
+    u.ai_unlimited = newVal
+    toast.ok(newVal ? 'ИИ доступ открыт' : 'ИИ доступ ограничен')
+  } catch { toast.err('Ошибка обновления ИИ доступа') }
+  finally { togglingAi.value = { ...togglingAi.value, [u.id]: false } }
+}
+
 const setRole = async (id: number, r: string) => { try { await adminSvc.role(id, r); const u = users.value.find(u => u.id === id); if (u) u.role = r; toast.ok('Роль обновлена') } catch { toast.err('Ошибка') } }
 const doBlock = async (id: number) => { try { await adminSvc.block(id); const u = users.value.find(u => u.id === id); if (u) u.is_active = false; toast.ok('Заблокирован') } catch { toast.err('Ошибка') } }
 const doUnblock = async (id: number) => { try { await adminSvc.unblock(id); const u = users.value.find(u => u.id === id); if (u) u.is_active = true; toast.ok('Разблокирован') } catch { toast.err('Ошибка') } }
@@ -302,6 +332,11 @@ onMounted(async () => {
 .action-desc{font-size:12px;color:var(--text3)}
 .action-card .btn{margin-left:auto}
 .bg-b0{background:#2563eb}.bg-b1{background:#009aaf}.bg-b2{background:#059669}.bg-b3{background:#d97706}.bg-b4{background:#dc2626}.bg-b5{background:#0891b2}
+/* AI quota badge */
+.ai-quota-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:100px}
+.ai-quota-badge.unlimited{background:rgba(52,211,153,.1);color:#10b981;border:1px solid rgba(52,211,153,.25)}
+.ai-quota-badge.limited{background:var(--surface2);color:var(--text4);border:1px solid var(--border)}
+
 /* AI Usage */
 .tab-ai-btn{display:flex;align-items:center;gap:6px}
 .ai-summary-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
