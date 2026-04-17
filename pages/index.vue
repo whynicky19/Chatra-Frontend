@@ -14,6 +14,11 @@
               {{ t('classes.create') }}
             </button>
             <button class="btn btn-teal" @click="showJoin=true">{{ t('classes.join_code') }}</button>
+            <!-- Lang switcher (mobile-visible) -->
+            <div class="head-lang-switch">
+              <button v-for="l in [{code:'ru',label:'RU'},{code:'en',label:'EN'},{code:'kk',label:'KZ'}]" :key="l.code"
+                :class="['head-lang-btn', { active: lang === l.code }]" @click="setLang(l.code as any)">{{ l.label }}</button>
+            </div>
             <!-- Theme toggle -->
             <button class="theme-toggle" @click="toggleTheme" :title="isDark ? 'Светлая тема' : 'Тёмная тема'">
               <div class="toggle-track" :class="{dark: isDark}">
@@ -241,7 +246,7 @@ import { useToast } from '~/composables/useToast'
 import { useI18n } from '~/composables/useI18n'
 definePageMeta({ layout: 'default' })
 const auth = useAuthStore(); const postsSvc = usePostsSvc(); const toast = useToast(); const router = useRouter()
-const { t, lang } = useI18n()
+const { t, lang, setLang } = useI18n()
 const allPosts = ref<any[]>([]); const loading = ref(true); const showCreate = ref(false)
 const showJoin = ref(false); const joining = ref(false); const joinError = ref('')
 const deletingClass = ref<any>(null); const deleting = ref(false)
@@ -428,6 +433,10 @@ watch(() => auth.user?.id, (newId) => { if (newId) loadJoined() })
 .btn-outline-teal:hover{background:var(--teal-l)}
 
 /* Theme toggle */
+.head-lang-switch{display:flex;align-items:center;gap:2px;background:var(--surface2);border:1px solid var(--border);border-radius:30px;padding:3px}
+.head-lang-btn{padding:4px 11px;border-radius:24px;font-size:11px;font-weight:700;letter-spacing:.05em;cursor:pointer;transition:all .15s;background:none;border:none;color:var(--text4)}
+.head-lang-btn:hover{color:var(--teal)}
+.head-lang-btn.active{background:var(--teal);color:#fff;box-shadow:0 2px 6px rgba(0,177,201,0.3)}
 .theme-toggle{background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center}
 .toggle-track{width:46px;height:26px;border-radius:100px;background:var(--surface3);border:1.5px solid var(--border2);position:relative;transition:all .25s;display:flex;align-items:center}
 .toggle-track.dark{background:var(--teal-d,#1a3a44);border-color:var(--teal)}

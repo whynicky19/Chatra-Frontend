@@ -170,6 +170,24 @@ export const translations: Record<string, Record<Lang, string>> = {
   'login.submit': { ru: 'Войти', en: 'Sign In', kk: 'Кіру' },
   'login.no_account': { ru: 'Нет аккаунта?', en: "Don't have an account?", kk: 'Аккаунт жоқ па?' },
   'login.register': { ru: 'Зарегистрироваться', en: 'Sign Up', kk: 'Тіркелу' },
+  'login.error': { ru: 'Неверный email или пароль', en: 'Invalid email or password', kk: 'Email немесе құпия сөз қате' },
+
+  // Register
+  'register.title': { ru: 'Создать аккаунт', en: 'Create Account', kk: 'Аккаунт жасау' },
+  'register.sub': { ru: 'Заполните данные для регистрации', en: 'Fill in your details to register', kk: 'Тіркелу үшін деректерді толтырыңыз' },
+  'register.fullname': { ru: 'ФИО', en: 'Full Name', kk: 'Толық аты-жөні' },
+  'register.fullname_placeholder': { ru: 'Иванов Иван Иванович', en: 'John Michael Smith', kk: 'Иванов Иван Иванович' },
+  'register.fullname_err': { ru: 'Введите фамилию и имя', en: 'Enter first and last name', kk: 'Тегі мен атын енгізіңіз' },
+  'register.email_invalid': { ru: '✕ Только gmail.com или icloud.com', en: '✕ Only gmail.com or icloud.com', kk: '✕ Тек gmail.com немесе icloud.com' },
+  'register.email_ok': { ru: '✓ Email корректный', en: '✓ Email is valid', kk: '✓ Email дұрыс' },
+  'register.email_required': { ru: 'Введите email', en: 'Enter your email', kk: 'Email енгізіңіз' },
+  'register.pw_placeholder': { ru: 'Минимум 6 символов', en: 'At least 6 characters', kk: 'Кемінде 6 таңба' },
+  'register.submit': { ru: 'Зарегистрироваться', en: 'Create Account', kk: 'Тіркелу' },
+  'register.has_account': { ru: 'Уже есть аккаунт?', en: 'Already have an account?', kk: 'Аккаунтыңыз бар ма?' },
+  'register.login_link': { ru: 'Войти', en: 'Sign In', kk: 'Кіру' },
+  'register.pw_weak': { ru: 'Слабый', en: 'Weak', kk: 'Әлсіз' },
+  'register.pw_medium': { ru: 'Средний', en: 'Medium', kk: 'Орташа' },
+  'register.pw_strong': { ru: 'Надёжный', en: 'Strong', kk: 'Сенімді' },
 
   // General
   'general.loading': { ru: 'Загрузка...', en: 'Loading...', kk: 'Жүктелуде...' },

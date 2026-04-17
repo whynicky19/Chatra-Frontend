@@ -1,26 +1,26 @@
 <template>
   <div class="auth-card anim-scale">
-    <h2 class="auth-title">Создать аккаунт</h2>
-    <p class="auth-sub">Заполните данные для регистрации</p>
+    <h2 class="auth-title">{{ t('register.title') }}</h2>
+    <p class="auth-sub">{{ t('register.sub') }}</p>
     <form @submit.prevent="sub" class="auth-form">
       <div class="frow">
-        <label class="flabel">ФИО <span style="color:var(--red)">*</span></label>
-        <input v-model="fullname" class="input" placeholder="Иванов Иван Иванович" maxlength="80"/>
-        <div v-if="fullname && fullname.trim().split(' ').filter(Boolean).length < 2" class="nick-hint err">Введите фамилию и имя</div>
+        <label class="flabel">{{ t('register.fullname') }} <span style="color:var(--red)">*</span></label>
+        <input v-model="fullname" class="input" :placeholder="t('register.fullname_placeholder')" maxlength="80"/>
+        <div v-if="fullname && fullname.trim().split(' ').filter(Boolean).length < 2" class="nick-hint err">{{ t('register.fullname_err') }}</div>
       </div>
 
       <div class="frow">
         <label class="flabel">Email</label>
         <input v-model="email" type="email" class="input" placeholder="you@example.com" @input="onEmailInput" @blur="emailTouched=true"/>
         <div v-if="emailTouched && email" :class="['nick-hint', emailOk?'ok':'err']">
-          <span v-if="!emailOk">✕ Только gmail.com или icloud.com</span>
-          <span v-else>✓ Email корректный</span>
+          <span v-if="!emailOk">{{ t('register.email_invalid') }}</span>
+          <span v-else>{{ t('register.email_ok') }}</span>
         </div>
-        <div v-if="emailTouched && !email" class="nick-hint err">Введите email</div>
+        <div v-if="emailTouched && !email" class="nick-hint err">{{ t('register.email_required') }}</div>
       </div>
       <div class="frow">
-        <label class="flabel">Пароль</label>
-        <input v-model="pw" type="password" class="input" placeholder="Минимум 6 символов" required minlength="6"/>
+        <label class="flabel">{{ t('login.password') }}</label>
+        <input v-model="pw" type="password" class="input" :placeholder="t('register.pw_placeholder')" required minlength="6"/>
         <div v-if="pw" class="str-row">
           <div class="str-bar"><div :style="{width:score+'%',background:scoreColor}" class="str-fill"></div></div>
           <span class="str-lbl">{{scoreLabel}}</span>
@@ -28,10 +28,10 @@
       </div>
       <button type="submit" class="btn btn-teal w-full btn-lg" :disabled="loading||!canSubmit">
         <div v-if="loading" class="spinner" style="width:15px;height:15px;border-width:2px;border-color:rgba(255,255,255,.3);border-top-color:#fff"></div>
-        <span v-else>Зарегистрироваться</span>
+        <span v-else>{{ t('register.submit') }}</span>
       </button>
     </form>
-    <p class="auth-link-row">Уже есть аккаунт? <NuxtLink to="/login" style="color:var(--teal);font-weight:500">Войти</NuxtLink></p>
+    <p class="auth-link-row">{{ t('register.has_account') }} <NuxtLink to="/login" style="color:var(--teal);font-weight:500">{{ t('register.login_link') }}</NuxtLink></p>
   </div>
 </template>
 <script setup lang="ts">
@@ -60,7 +60,7 @@ const pwScore = computed(() => {
 })
 const score = computed(() => pwScore.value)
 const scoreColor = computed(() => score.value<=40?'var(--red)':score.value<=60?'var(--yellow)':'var(--green)')
-const scoreLabel = computed(() => score.value<=40?'Слабый':score.value<=60?'Средний':'Надёжный')
+const scoreLabel = computed(() => score.value<=40?t('register.pw_weak'):score.value<=60?t('register.pw_medium'):t('register.pw_strong'))
 
 const sub = async () => {
   if (!canSubmit.value) return

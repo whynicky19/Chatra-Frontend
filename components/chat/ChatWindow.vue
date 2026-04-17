@@ -186,6 +186,21 @@ const auth = useAuthStore()
 const chatsStore = useChatsStore()
 const { lang } = useI18n()
 const { loadMsgs, loadUsers, connectWs, sendMsg, delMsg } = useChat()
+
+// Online status based on last message from the other user
+const otherUserId = computed(() => {
+  const users = chatsStore.activeUsers
+  return users.find(u => u.id !== auth.user?.id)?.id ?? null
+})
+
+const wsOk = computed(() => {
+  const uid = otherUserId.value
+  if (!uid) return false
+  const msgs = chatsStore.activeMsgs
+  const last = [...msgs].reverse().find(m => m.user_id === uid)
+  if (!last?.created_at) return false
+  return Date.now() - new Date(last.created_at).getTime() < 10 * 60 * 1000
+})
 const uploadSvc = useUploadSvc()
 const chatsSvc = useChatsSvc()
 const usersSvc = useUsersSvc()
@@ -200,7 +215,6 @@ const showSearch = ref(false)
 const showMembers = ref(false)
 const showAddModal = ref(false)
 const searchQ = ref('')
-const wsOk = ref(false)
 
 // Add member
 const addQ = ref('')
@@ -332,11 +346,9 @@ const deleteMsg = (id: number) => { if (chatsStore.active) delMsg(chatsStore.act
 
 watch(() => chatsStore.active, async c => {
   if (c) {
-    wsOk.value = false
     searchQ.value = ''
     await Promise.all([loadMsgs(c.id), loadUsers(c.id)])
     connectWs(c.id)
-    wsOk.value = true
     scrollBottom()
   }
 }, { immediate: true })

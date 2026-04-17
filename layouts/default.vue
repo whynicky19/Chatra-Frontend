@@ -17,7 +17,7 @@ const { fetchMe } = useAuth()
 const auth = useAuthStore()
 const chatsStore = useChatsStore()
 const chatsSvc = useChatsSvc()
-const { connectWs, startChatPoller } = useChat()
+const { connectWs, loadMsgs, startChatPoller } = useChat()
 
 onMounted(async () => {
   if (auth.token && !auth.user) await fetchMe()
@@ -29,6 +29,8 @@ onMounted(async () => {
       chatsStore.setChats(chats)
       // Connect WS to ALL chats so messages arrive even when chat is not active
       chats.forEach((c: any) => connectWs(c.id))
+      // Preload messages so chat list previews are visible without opening each chat
+      await Promise.all(chats.map((c: any) => loadMsgs(c.id)))
     } catch {}
 
     // Start polling for new chats (DMs from other users)

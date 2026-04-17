@@ -43,7 +43,7 @@ const sub = async () => {
   loading.value = true
   const ok = await login(email.value, pw.value)
   if (ok) await navigateTo('/')
-  else errorMsg.value = 'Неверный email или пароль'
+  else errorMsg.value = t('login.error')
   loading.value = false
 }
 </script>

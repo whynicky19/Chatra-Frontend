@@ -8,6 +8,11 @@
       <div class="auth-brand">
         <img src="/logo.png" class="auth-logo-img" alt="Chatra"/>
       </div>
+      <div class="lang-switcher">
+        <button v-for="l in langs" :key="l.code" @click="setLang(l.code)" :class="['lang-btn', { active: lang === l.code }]">
+          {{ l.label }}
+        </button>
+      </div>
       <slot/>
     </div>
   </div>
@@ -15,6 +20,14 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useI18n } from '~/composables/useI18n'
+
+const { lang, setLang } = useI18n()
+const langs = [
+  { code: 'ru' as const, label: 'RU' },
+  { code: 'en' as const, label: 'EN' },
+  { code: 'kk' as const, label: 'KZ' },
+]
 const canvasEl = ref<HTMLCanvasElement | null>(null)
 let animId = 0
 
@@ -126,6 +139,7 @@ onUnmounted(() => cancelAnimationFrame(animId))
   overflow: hidden; background: #f0f8fa;
   height: 100vh; height: 100dvh;
   touch-action: none; overscroll-behavior: none;
+  padding-bottom: 10vh;
 }
 .auth-canvas { position:absolute;inset:0;width:100%;height:100%;display:block }
 .orb { position:absolute;border-radius:50%;border:1px solid transparent;pointer-events:none;animation:orbit-spin linear infinite }
@@ -148,15 +162,36 @@ onUnmounted(() => cancelAnimationFrame(animId))
 @keyframes brand-enter { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
 .auth-logo-img { width:180px;height:auto;object-fit:contain }
 
+.lang-switcher {
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(255,255,255,0.75); backdrop-filter: blur(10px);
+  border: 1px solid rgba(0,177,201,0.2); border-radius: 30px;
+  padding: 4px; flex-shrink: 0;
+}
+.lang-btn {
+  padding: 5px 14px; border-radius: 24px; font-size: 12px; font-weight: 700;
+  letter-spacing: .06em; cursor: pointer; transition: all .18s;
+  background: none; border: none; color: #4a7a86;
+}
+.lang-btn:hover { color: #00B1C9; }
+.lang-btn.active {
+  background: #00B1C9; color: #fff;
+  box-shadow: 0 2px 8px rgba(0,177,201,0.35);
+}
+
 @media (max-width:768px) {
+  .auth-shell { padding-bottom: 8vh; }
   .auth-content { padding: 16px 12px; gap: 12px; max-width: 100%; width: 100%; }
   .auth-logo-img { width: 110px; }
   .orb-1 { width: 300px; height: 300px; }
   .orb-2 { width: 500px; height: 500px; }
   .orb-3 { width: 700px; height: 700px; }
+  .lang-btn { padding: 5px 12px; font-size: 11px; }
 }
 @media (max-width:480px) {
+  .auth-shell { padding-bottom: 6vh; }
   .auth-content { padding: 12px 10px; gap: 10px; }
   .auth-logo-img { width: 90px; }
+  .lang-btn { padding: 5px 10px; }
 }
 </style>

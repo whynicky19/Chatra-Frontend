@@ -698,6 +698,7 @@ const onSubmitted = (sub: Submission) => {
 onMounted(async () => {
   loading.value = true
   try { const posts = await postsSvc.list(); allPosts.value = posts } catch { toast.err(t('general.error')) } finally { loading.value = false }
+  if (!isTeacher.value) loadRating()
 })
 </script>
 

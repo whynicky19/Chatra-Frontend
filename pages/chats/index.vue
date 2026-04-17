@@ -106,7 +106,7 @@ import { useChatsSvc } from '~/services/chats'
 import { useUsersSvc } from '~/services/users'
 import { useChat } from '~/composables/useChat'
 definePageMeta({ layout: 'default' })
-const auth=useAuthStore();const chatsStore=useChatsStore();const chatsSvc=useChatsSvc();const usersSvc=useUsersSvc();const toast=useToast();const{connectWs,loadUsers,startChatPoller}=useChat()
+const auth=useAuthStore();const chatsStore=useChatsStore();const chatsSvc=useChatsSvc();const usersSvc=useUsersSvc();const toast=useToast();const{connectWs,loadUsers,loadMsgs,startChatPoller}=useChat()
 const { t } = useI18n()
 const searchQ=ref('');const sResults=ref<any[]>([]);const sLoading=ref(false);const showNew=ref(false);const newName=ref('');const creating=ref(false)
 let timer:any=null
@@ -133,7 +133,7 @@ onMounted(async()=>{
   _resizeHandler=()=>{isMobile.value=window.innerWidth<=768}
   _resizeHandler()
   window.addEventListener('resize',_resizeHandler)
-  if(!chatsStore.chats.length){chatsStore.loadingChats=true;try{const c=await chatsSvc.list();chatsStore.setChats(c);await Promise.all(c.map(async(ch:any)=>{connectWs(ch.id);await loadUsers(ch.id)}))}catch{toast.err(t('chats.error'))}finally{chatsStore.loadingChats=false}}else{chatsStore.chats.forEach((ch:any)=>{if(!chatsStore.chatUsers[ch.id]?.length)loadUsers(ch.id)})};startChatPoller()
+  if(!chatsStore.chats.length){chatsStore.loadingChats=true;try{const c=await chatsSvc.list();chatsStore.setChats(c);await Promise.all(c.map(async(ch:any)=>{connectWs(ch.id);await loadUsers(ch.id)}));await Promise.all(c.map((ch:any)=>loadMsgs(ch.id)))}catch{toast.err(t('chats.error'))}finally{chatsStore.loadingChats=false}}else{chatsStore.chats.forEach((ch:any)=>{if(!chatsStore.chatUsers[ch.id]?.length)loadUsers(ch.id);if(!chatsStore.messages[ch.id]?.length)loadMsgs(ch.id)})};startChatPoller()
 })
 onUnmounted(()=>{if(import.meta.client)window.removeEventListener('resize',_resizeHandler)})
 </script>

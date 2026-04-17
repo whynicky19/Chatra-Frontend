@@ -571,9 +571,9 @@ onMounted(async () => {
 .file-chip.small { font-size: 12px; padding: 5px 10px; }
 .criteria-list { display: flex; flex-direction: column; gap: 8px; }
 .criterion { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 12px 14px; }
-.criterion-top { display: flex; justify-content: space-between; margin-bottom: 4px; }
-.criterion-name { font-size: 13px; font-weight: 700; color: var(--text1); }
-.criterion-pts { font-size: 12px; font-weight: 700; color: var(--teal); }
+.criterion-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+.criterion-name { font-size: 13px; font-weight: 700; color: var(--text1); flex: 1; min-width: 0; word-break: break-word; }
+.criterion-pts { font-size: 12px; font-weight: 700; color: var(--teal); flex-shrink: 0; white-space: nowrap; }
 .criterion-desc { font-size: 12px; color: var(--text4); margin-bottom: 8px; }
 .criterion-bar { height: 4px; background: var(--surface3); border-radius: 4px; overflow: hidden; }
 .criterion-bar-fill { height: 100%; background: linear-gradient(90deg, var(--teal), #4dd6e8); border-radius: 4px; }
@@ -634,9 +634,9 @@ onMounted(async () => {
 .feedback-text { font-size: 13px; color: var(--text2); line-height: 1.7; }
 .grade-criteria { display: flex; flex-direction: column; gap: 8px; }
 .cs-item { background: var(--surface3); border-radius: var(--r-md); padding: 10px 12px; }
-.cs-top { display: flex; justify-content: space-between; margin-bottom: 3px; }
-.cs-name { font-size: 13px; font-weight: 600; color: var(--text1); }
-.cs-pts { font-size: 12px; font-weight: 700; color: var(--teal); }
+.cs-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 3px; }
+.cs-name { font-size: 13px; font-weight: 600; color: var(--text1); flex: 1; min-width: 0; word-break: break-word; }
+.cs-pts { font-size: 12px; font-weight: 700; color: var(--teal); flex-shrink: 0; white-space: nowrap; }
 .cs-comment { font-size: 12px; color: var(--text4); margin-bottom: 7px; }
 .cs-bar { height: 3px; background: var(--border); border-radius: 3px; overflow: hidden; }
 .cs-bar-fill { height: 100%; background: linear-gradient(90deg, var(--teal), #4dd6e8); border-radius: 3px; }
@@ -698,27 +698,39 @@ onMounted(async () => {
 .field-hint-warn { font-size: 12px; color: var(--yellow, #f59e0b); margin-top: 4px; }
 
 @media (max-width:768px) {
-  .am-modal { max-width: 100%; max-height: 96dvh; border-radius: var(--r-2xl) var(--r-2xl) 0 0; }
+  .am-modal { max-width: 100%; max-height: 92dvh; border-radius: var(--r-2xl) var(--r-2xl) 0 0; }
   .am-head { padding: 16px 14px 12px; }
-  .am-ico { width: 36px; height: 36px; }
-  .am-title { font-size: 16px; margin-bottom: 6px; }
+  .am-ico { width: 36px; height: 36px; flex-shrink: 0; }
+  .am-title { font-size: 16px; margin-bottom: 6px; word-break: break-word; }
   .am-badges { flex-wrap: wrap; gap: 6px; }
   .am-tabs { padding: 0 10px; overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
   .am-tab { padding: 10px 12px; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
-  .am-body { padding: 14px 14px 24px; gap: 14px; }
+  .am-body { padding: 14px 14px 80px; gap: 14px; }
   .inp { font-size: 16px; }
   .inp-ta { font-size: 16px; min-height: 100px; }
   .grade-num { font-size: 32px; }
   .grade-pct { font-size: 18px; }
-  .sub-row { padding: 10px 12px; gap: 10px; }
+  .sub-row { padding: 10px 12px; gap: 10px; flex-wrap: nowrap; }
+  .sub-info { min-width: 0; }
+  .sub-student { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .sub-meta { flex-wrap: wrap; gap: 4px; }
+  .sub-status-bar { flex-wrap: wrap; gap: 8px; }
   .variant-chips { gap: 6px; }
   .variant-chip { padding: 9px 14px; min-height: 44px; }
   .grade-actions { flex-direction: column; gap: 8px; }
   .grade-actions .btn { width: 100%; justify-content: center; }
+  .subs-stats { flex-wrap: wrap; }
+  .stat-chip { min-width: 70px; padding: 10px 12px; }
+  .stat-n { font-size: 22px; }
+  .btn-bulk-grade { font-size: 12px; padding: 10px 12px; }
+  .desc-block { font-size: 13px; word-break: break-word; }
+  .grade-card { padding: 14px; }
+  .grade-card-top { flex-wrap: wrap; gap: 8px; }
 }
 @media (max-width:480px) {
   .am-head-l { flex-direction: column; gap: 8px; }
   .am-head { padding: 14px 12px 10px; }
-  .am-body { padding: 12px 12px 24px; }
+  .am-body { padding: 12px 12px 80px; }
+  .subs-stats { gap: 6px; }
 }
 </style>
