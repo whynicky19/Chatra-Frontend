@@ -187,7 +187,6 @@ const chatsStore = useChatsStore()
 const { lang } = useI18n()
 const { loadMsgs, loadUsers, connectWs, sendMsg, delMsg } = useChat()
 
-// Online status based on last message from the other user
 const otherUserId = computed(() => {
   const users = chatsStore.activeUsers
   return users.find(u => u.id !== auth.user?.id)?.id ?? null
@@ -216,7 +215,6 @@ const showMembers = ref(false)
 const showAddModal = ref(false)
 const searchQ = ref('')
 
-// Add member
 const addQ = ref('')
 const addResults = ref<any[]>([])
 const addLoading = ref(false)
@@ -232,7 +230,6 @@ const getNick = (u: any): string => u.full_name || nickReg()[u.id] || u.email.sp
 const getNickInit = (u: any): string => getNick(u)[0]?.toUpperCase()||'?'
 const getAvatar = (uid: number): string => uid===auth.user?.id&&auth.avatar ? auth.avatar : (avatarReg()[uid]||'')
 
-// Chat title — show full name for DMs
 const chatTitle = computed(() => {
   const users = chatsStore.activeUsers
   const other = users.find(u => u.id !== auth.user?.id)
@@ -281,7 +278,6 @@ const onFilePick = (e: Event) => { const f=(e.target as HTMLInputElement).files?
 
 const closeAdd = () => { showAddModal.value=false; addQ.value=''; addResults.value=[] }
 
-// Search for add member
 const onAddSearch = () => {
   clearTimeout(addTimer)
   addResults.value = []

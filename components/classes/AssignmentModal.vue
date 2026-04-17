@@ -351,12 +351,10 @@ const uploadIdxSub = ref(0)
 const uploadPctSub = ref(0)
 const form = ref({ text: '', file: null as File|null, variantNumber: null as number|null })
 
-// ─── Computed ──────────────────────────────────────────────────────────────────
 const parsedCriteria = computed(() => { try { return JSON.parse(props.assignment.criteria) } catch { return [] } })
 const parsedCriteriaScores = computed(() => { if (!mySubmission.value?.grade?.criteria_scores) return null; try { return JSON.parse(mySubmission.value.grade.criteria_scores) } catch { return null } })
 const parsedActiveScores = computed(() => { if (!activeSub.value?.grade?.criteria_scores) return null; try { return JSON.parse(activeSub.value.grade.criteria_scores) } catch { return null } })
 
-// Парсинг списка файлов из JSON-строки
 const parseFileUrls = (raw?: string | null): string[] => {
   if (!raw) return []
   try { const arr = JSON.parse(raw); return Array.isArray(arr) ? arr : [] } catch { return [] }
@@ -364,7 +362,6 @@ const parseFileUrls = (raw?: string | null): string[] => {
 const parsedSubmittedUrls = computed(() => parseFileUrls(mySubmission.value?.file_urls))
 const parsedActiveUrls = computed(() => parseFileUrls(activeSub.value?.file_urls))
 
-// Extract files from assignment description
 const assignmentFiles = computed(() => {
   const desc = props.assignment.description || ''
   const urlRe = /(https?:\/\/[^\s\n"'<>]+)/g
@@ -389,7 +386,6 @@ const canSubmit = computed(() =>
   (assignmentVariants.value.length === 0 || form.value.variantNumber !== null)
 )
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
 const getStudentName = (id: number) => studentMap.value[id] || `Студент #${id}`
 const getStudentInitials = (id: number) => { const fn = studentMap.value[id]; if (!fn) return String(id); const parts = fn.trim().split(' ').filter(Boolean); return parts.map((p:string) => p[0]).join('').toUpperCase().slice(0, 2) || String(id) }
 const statusLabel = (s: string) => ({ submitted: 'Выполнено', grading: 'Проверяется', graded: 'Оценено', late: 'Просрочено' }[s] || s)
@@ -419,7 +415,6 @@ const onFileSelect = (e: Event) => {
   ;(e.target as HTMLInputElement).value = ''
 }
 
-// ─── Load submissions ──────────────────────────────────────────────────────────
 const loadSubs = async () => {
   if (loadingSubs.value) return
   loadingSubs.value = true
@@ -429,14 +424,12 @@ const loadSubs = async () => {
       usersSvc.all()
     ])
     submissions.value = subs
-    // Build map: user_id → ФИО from server, fallback to localStorage or email
     const fnReg: Record<number, string> = JSON.parse(localStorage.getItem('_fullname_registry') || '{}')
     const nickReg: Record<number, string> = JSON.parse(localStorage.getItem('_nick_registry') || '{}')
     const map: Record<number, string> = {}
     for (const u of users) {
       map[u.id] = u.full_name || u.fullName || fnReg[u.id] || nickReg[u.id] || u.name || u.email || `Студент #${u.id}`
     }
-    // Enrich with student_name from submission objects — backend returns it directly
     for (const sub of subs) {
       if (sub.student_name && sub.student_id) {
         map[sub.student_id] = sub.student_name
@@ -448,7 +441,6 @@ const loadSubs = async () => {
   finally { loadingSubs.value = false }
 }
 
-// ─── AI grade ─────────────────────────────────────────────────────────────────
 const runAiGrade = async () => {
   if (!activeSub.value || grading.value) return
   grading.value = true
@@ -462,7 +454,6 @@ const runAiGrade = async () => {
   finally { grading.value = false }
 }
 
-// ─── Bulk AI grade ─────────────────────────────────────────────────────────────
 const runBulkAiGrade = async () => {
   if (bulkGrading.value) return
   const pending = submissions.value.filter(s => s.status === 'submitted' || s.status === 'late')
@@ -484,7 +475,6 @@ const runBulkAiGrade = async () => {
   toast.ok(`ИИ проверил ${ok} из ${pending.length} работ`)
 }
 
-// ─── Retract submission ────────────────────────────────────────────────────────
 const retract = async () => {
   if (!mySubmission.value || retracting.value) return
   retracting.value = true
@@ -499,7 +489,6 @@ const retract = async () => {
   finally { retracting.value = false }
 }
 
-// ─── Submit ────────────────────────────────────────────────────────────────────
 const doSubmit = async () => {
   if (!canSubmit.value || submitting.value) return
   submitting.value = true
@@ -528,9 +517,7 @@ const doSubmit = async () => {
   finally { submitting.value = false; uploading.value = false }
 }
 
-// ─── Init ──────────────────────────────────────────────────────────────────────
 onMounted(async () => {
-  // Load variants for all users (needed for student variant selector and teacher display)
   try {
     assignmentVariants.value = await svc.listVariants(props.assignment.id)
   } catch {}

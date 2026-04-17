@@ -8,7 +8,7 @@ export interface Msg {
   user_id: number
   created_at: string | null
   is_read: boolean | null
-  file_url: string | null   // fixed typo: was fike_url
+  file_url: string | null
 }
 export interface ChatUser { id: number; email: string; role: string; is_active: boolean }
 
@@ -73,10 +73,7 @@ export const useChatsStore = defineStore('chats', {
 
     setChatUsers(id: number, u: ChatUser[]) { this.chatUsers[id] = u },
 
-    /**
-     * Connect to chat WebSocket.
-     * Token is passed as query param so the backend can authenticate.
-     */
+    // токен передаётся query-параметром для аутентификации на бэке
     connectWs(chatId: number, wsBase: string, onMsg: () => void, token?: string) {
       if (this.ws[chatId]) return
       const tokenParam = token ? `?token=${encodeURIComponent(token)}` : ''

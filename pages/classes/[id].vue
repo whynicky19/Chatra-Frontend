@@ -470,18 +470,15 @@ const allPosts = ref<any[]>([])
 const assignments = ref<Assignment[]>([])
 const mySubmissions = ref<Submission[]>([])
 
-// Edit post state
 const editingPost = ref<any>(null)
 const editPostForm = ref({ title: '', content: '' })
 const editPostSaving = ref(false)
 
-// Edit assignment state
 const editingAssignment = ref<any>(null)
 const editAsgForm = ref<{ title: string; description: string; max_score: number; deadline: string; criteria: Array<{name:string;weight:number;description:string}> }>({ title: '', description: '', max_score: 100, deadline: '', criteria: [] })
 const editAsgSaving = ref(false)
 const loadingAssignments = ref(false)
 
-// Real rating from backend
 const ratingData = ref({ avg_score: 0, avg_percent: 0, graded_count: 0, total_score: 0, max_possible: 0 })
 const loadingRating = ref(false)
 const assignmentsLoaded = ref(false)
@@ -495,7 +492,6 @@ const classPost = computed(() =>
 const classMeta = computed(() => { if (!classPost.value) return {}; try { return JSON.parse(classPost.value.body) } catch { return {} } })
 const classTitle = computed(() => classPost.value?.title || `Класс #${classId.value}`)
 
-// Cover image style for page header
 const heroStyle = computed(() => {
   const img = classMeta.value.cover_image
   if (img) return { backgroundImage: `url(${img})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -505,7 +501,6 @@ const classPosts = computed(() => allPosts.value.filter(p => p.title?.includes(`
 const lectures = computed(() => classPosts.value.filter(p => p.title?.startsWith('[LECTURE]')))
 const materials = computed(() => classPosts.value.filter(p => p.title?.startsWith('[HW]')))
 
-// Sidebar computed — driven by real API rating data
 const avgScore = computed(() => ratingData.value.avg_score || null)
 const avgScoreDisplay = computed(() => Math.round(ratingData.value.avg_score || 0))
 const maxPossibleScore = computed(() => assignments.value.reduce((s, a) => s + (a.max_score || 0), 0) || 100)
@@ -541,7 +536,6 @@ const fmtRemaining = (d: string) => {
   } catch { return '' }
 }
 
-// Assignment status helpers
 const mySubmissionsMap = computed(() => {
   const m: Record<number, Submission> = {}
   mySubmissions.value.forEach(s => { m[s.assignment_id] = s })
@@ -666,7 +660,6 @@ const loadAssignments = async () => {
     assignments.value = await assignmentsSvc.list(classId.value)
     if (!isTeacher.value) {
       mySubmissions.value = await assignmentsSvc.mySubmissions()
-      // Load real rating from API
       loadRating()
     }
     assignmentsLoaded.value = true
@@ -691,7 +684,6 @@ const onAssignmentCreated = (a: Assignment) => { assignments.value.unshift(a); s
 const onSubmitted = (sub: Submission) => {
   const idx = mySubmissions.value.findIndex(s => s.assignment_id === sub.assignment_id)
   if (idx !== -1) mySubmissions.value[idx] = sub; else mySubmissions.value.push(sub)
-  // Refresh rating after submission
   loadRating()
 }
 

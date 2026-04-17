@@ -56,14 +56,13 @@ export const useChat = () => {
       } catch {}
     }
     poll()
-    // Only register one interval across hot-reloads
+    // один интервал на всё приложение, не дублируем при hot-reload
     if (!(window as any).__chatPollInterval) {
       ;(window as any).__chatPollInterval = setInterval(poll, 3000)
     }
   }
 
   const connectWs = (id: number) => {
-    // Pass JWT token so backend can authenticate the WS connection
     store.connectWs(id, cfg.public.wsBase, async () => {
       await refreshMsgs(id)
       if (store.active?.id !== id) {
@@ -86,7 +85,7 @@ export const useChat = () => {
   const sendMsg = async (chatId: number, content: string) => {
     if (!content.trim()) return false
     try {
-      // Show message instantly (optimistic)
+      // оптимистичное добавление до ответа сервера
       const tempId = -Date.now()
       const tempMsg = {
         id: tempId,
@@ -99,10 +98,8 @@ export const useChat = () => {
       }
       store.addMsg(chatId, tempMsg, auth.user?.id ?? 0)
 
-      // Send to backend — server returns full message object
       const saved = await msgSvc.send(chatId, content.trim())
 
-      // Remove temp, add real message
       store.removeMsg(chatId, tempId)
       if (saved?.id) {
         store.addMsg(chatId, {
@@ -115,7 +112,6 @@ export const useChat = () => {
           file_url: saved.file_url ?? null,
         }, auth.user?.id ?? 0)
       } else {
-        // Fallback: reload from server
         await loadMsgs(chatId)
       }
 

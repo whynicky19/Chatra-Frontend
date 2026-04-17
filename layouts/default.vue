@@ -22,18 +22,15 @@ const { connectWs, loadMsgs, startChatPoller } = useChat()
 onMounted(async () => {
   if (auth.token && !auth.user) await fetchMe()
 
-  // Load all chats and connect WS to each — critical for receiving DMs
   if (auth.token) {
     try {
       const chats = await chatsSvc.list()
       chatsStore.setChats(chats)
-      // Connect WS to ALL chats so messages arrive even when chat is not active
       chats.forEach((c: any) => connectWs(c.id))
-      // Preload messages so chat list previews are visible without opening each chat
+      // предзагружаем сообщения для превью в списке чатов
       await Promise.all(chats.map((c: any) => loadMsgs(c.id)))
     } catch {}
 
-    // Start polling for new chats (DMs from other users)
     startChatPoller()
   }
 })
