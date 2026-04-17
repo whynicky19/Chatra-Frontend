@@ -1,13 +1,9 @@
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 type Lang = 'ru' | 'en' | 'kk'
 
 const _lang = ref<Lang>('ru')
-
-if (import.meta.client) {
-  const saved = localStorage.getItem('_lang') as Lang
-  if (saved === 'en' || saved === 'ru' || saved === 'kk') _lang.value = saved
-}
+let _ready = false
 
 export const translations: Record<string, Record<Lang, string>> = {
   // Sidebar
@@ -204,6 +200,14 @@ export const translations: Record<string, Record<Lang, string>> = {
 
 export const useI18n = () => {
   const lang = _lang
+
+  if (!_ready) {
+    onMounted(() => {
+      _ready = true
+      const saved = localStorage.getItem('_lang') as Lang
+      if (saved === 'en' || saved === 'ru' || saved === 'kk') _lang.value = saved
+    })
+  }
 
   const t = (key: string): string => {
     const entry = translations[key]

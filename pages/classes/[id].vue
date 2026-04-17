@@ -97,6 +97,37 @@
             </div>
           </div>
 
+          <!-- Рейтинг и дедлайн для студентов — только мобайл -->
+          <div v-if="!isTeacher && tab !== 'ai'" class="mobile-stats">
+            <div class="ms-score">
+              <div class="ms-score-top">
+                <span class="ms-label">{{ t('class.your_rating') }}</span>
+                <span class="ms-num">{{ avgScoreDisplay }}<span class="ms-denom">/100</span></span>
+              </div>
+              <div v-if="ratingData.graded_count > 0">
+                <div class="ms-bar-row">
+                  <span class="ms-bar-label">{{ t('class.performance') }}</span>
+                  <span class="ms-bar-val">{{ performancePercent }}%</span>
+                </div>
+                <div class="ms-bar"><div class="ms-bar-fill" :style="{width: performancePercent+'%'}"></div></div>
+              </div>
+              <div v-else class="ms-empty">{{ lang === 'ru' ? 'Нет оценённых заданий' : lang === 'kk' ? 'Тапсырмалар жоқ' : 'No graded assignments' }}</div>
+            </div>
+            <div v-if="nextDeadline" class="ms-deadline">
+              <span class="ms-label">{{ t('class.next_deadline') }}</span>
+              <div class="ms-deadline-row">
+                <div class="ms-date-box">
+                  <div class="ms-month">{{ fmtMonth(nextDeadline.deadline) }}</div>
+                  <div class="ms-day">{{ fmtDay(nextDeadline.deadline) }}</div>
+                </div>
+                <div class="ms-deadline-info">
+                  <div class="ms-deadline-title">{{ nextDeadline.title }}</div>
+                  <div class="ms-deadline-rem">{{ fmtRemaining(nextDeadline.deadline) }}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Tab content -->
           <div class="tab-content" :class="{ 'ai-mode': tab === 'ai' }">
 
@@ -843,6 +874,27 @@ onMounted(async () => {
 .sidebar-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:18px}
 .score-card{background:linear-gradient(135deg,#007a8e,#00B1C9);border:none;color:#fff}
 .score-no-grades{font-size:12px;opacity:.7;margin-top:8px;font-style:italic}
+
+.mobile-stats{display:none}
+.ms-score{flex:1;min-width:140px;background:linear-gradient(135deg,#007a8e,#00B1C9);border-radius:var(--r-xl);padding:14px 16px;color:#fff}
+.ms-deadline{flex:1;min-width:140px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:14px 16px}
+.ms-score-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ms-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.8}
+.ms-num{font-family:'Outfit',sans-serif;font-size:24px;font-weight:900;line-height:1}
+.ms-denom{font-size:13px;font-weight:500;opacity:.7;margin-left:2px}
+.ms-empty{font-size:11px;opacity:.7;font-style:italic;margin-top:4px}
+.ms-bar-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.ms-bar-label{font-size:11px;opacity:.8}
+.ms-bar-val{font-size:11px;font-weight:700}
+.ms-bar{height:4px;background:rgba(255,255,255,.25);border-radius:4px;overflow:hidden}
+.ms-bar-fill{height:100%;background:#fff;border-radius:4px;transition:width .4s}
+.ms-deadline .ms-label{color:var(--text4)}
+.ms-deadline-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+.ms-date-box{background:var(--teal-l);border:1px solid rgba(0,177,201,.2);border-radius:var(--r-md);padding:6px 10px;text-align:center;flex-shrink:0}
+.ms-month{font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.05em}
+.ms-day{font-size:20px;font-weight:900;color:var(--teal);font-family:'Outfit',sans-serif;line-height:1.1}
+.ms-deadline-title{font-size:13px;font-weight:600;color:var(--text1);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:140px}
+.ms-deadline-rem{font-size:11px;color:var(--text4)}
 .score-count{font-size:11px;opacity:.65;margin-top:8px}
 .score-label{font-size:10px;font-weight:700;letter-spacing:.1em;opacity:.7;margin-bottom:8px}
 .score-num{display:flex;align-items:baseline;gap:6px;margin-bottom:16px}
@@ -898,6 +950,7 @@ onMounted(async () => {
   .topbar-breadcrumb{max-width:160px;overflow:hidden}
   .cd-sidebar{display:none}
   .cd-layout{flex-direction:column;overflow-x:hidden}
+  .mobile-stats{display:flex;gap:10px;padding:10px 12px 0;flex-wrap:wrap}
   .cd-main{overflow-x:hidden;max-width:100%}
   .tabs-wrap{
     overflow:hidden;
