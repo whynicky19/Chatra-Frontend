@@ -116,7 +116,7 @@ let _resizeHandler:()=>void
 const nickReg=():Record<string,string>=>{try{return JSON.parse(localStorage.getItem('_nick_registry')||'{}')}catch{return{}}}
 const avatarReg=():Record<string,string>=>{try{return JSON.parse(localStorage.getItem('_avatar_registry')||'{}')}catch{return{}}}
 const getAvatar=(uid:number):string=>uid===auth.user?.id&&auth.avatar?auth.avatar:(avatarReg()[uid]||'')
-const displayName=(u:any):string=>nickReg()[u.id]||u.email.split('@')[0]
+const displayName=(u:any):string=>nickReg()[u.id]||u.full_name||u.email.split('@')[0]
 const displayInit=(u:any):string=>displayName(u)[0]?.toUpperCase()||'?'
 const chatTitle=(c:any):string=>{const users=chatsStore.chatUsers[c.id]||[];const other=users.find((u:any)=>u.id!==auth.user?.id);if(other){const n=nickReg()[other.id];return n||other.email.split('@')[0]};return c.name?.startsWith('Чат с ')?c.name.replace('Чат с ',''):c.name||''}
 const chatInit=(c:any):string=>chatTitle(c)[0]?.toUpperCase()||'#'
@@ -124,7 +124,7 @@ const getChatAvatar=(c:any):string=>{const users=chatsStore.chatUsers[c.id]||[];
 const lastPreview=(id:number):string=>{const m=chatsStore.messages[id];if(!m?.length)return t('chats.no_messages');const last=m[m.length-1];if(last.content?.startsWith('🖼️'))return'📷 Фото';if(last.content?.startsWith('📎'))return'📎 Файл';return last.content?.slice(0,45)||''}
 const chatTime=(id:number):string=>{const m=chatsStore.messages[id];if(!m?.length)return'';const last=m[m.length-1];if(!last?.created_at)return'';try{const d=new Date(last.created_at);const now=new Date();const diff=now.getTime()-d.getTime();if(diff<86400000)return d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});return d.toLocaleDateString([],{month:'short',day:'numeric'})}catch{return''}}
 const unread=(id:number)=>chatsStore.unread[id]||0
-const onSearch=()=>{clearTimeout(timer);sResults.value=[];const q=searchQ.value.trim().toLowerCase();if(!q)return;sLoading.value=true;timer=setTimeout(async()=>{try{const all=await usersSvc.all();sResults.value=all.filter((u:any)=>u.id!==auth.user?.id&&u.email.toLowerCase().includes(q))}catch{sResults.value=[]}finally{sLoading.value=false}},300)}
+const onSearch=()=>{clearTimeout(timer);sResults.value=[];const q=searchQ.value.trim().toLowerCase();if(!q)return;sLoading.value=true;timer=setTimeout(async()=>{try{const all=await usersSvc.all();sResults.value=all.filter((u:any)=>u.id!==auth.user?.id&&(u.email.toLowerCase().includes(q)||(u.full_name||'').toLowerCase().includes(q)))}catch{sResults.value=[]}finally{sLoading.value=false}},300)}
 const clearSearch=()=>{searchQ.value='';sResults.value=[]}
 const openDM=async(user:any)=>{const exist=chatsStore.chats.find(c=>{const us=chatsStore.chatUsers[c.id]||[];return us.length===2&&us.some((u:any)=>u.id===user.id)&&us.some((u:any)=>u.id===auth.user?.id)});if(exist){chatsStore.setActive(exist);chatsStore.markRead(exist.id);clearSearch();return};try{const c=await chatsSvc.create(`Чат с ${user.email}`);await chatsSvc.addUser(c.id,user.id);connectWs(c.id);await loadUsers(c.id);chatsStore.addChat(c);chatsStore.setActive(c);clearSearch();toast.ok(t('chats.created'))}catch{toast.err(t('chats.error'))}}
 const selectChat=(c:any)=>{chatsStore.setActive(c);chatsStore.markRead(c.id)}

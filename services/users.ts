@@ -5,11 +5,11 @@ export const useUsersSvc = () => {
 
   const getAll = async (): Promise<any[]> => {
     try {
-      const { data } = await api.get('/users/')
+      const { data } = await api.get('/admin/users')
       return data as any[]
     } catch {
       try {
-        const { data } = await api.get('/admin/users')
+        const { data } = await api.get('/users/')
         return data as any[]
       } catch { return [] }
     }
