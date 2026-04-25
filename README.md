@@ -24,7 +24,3 @@ npm run dev
 
 App: http://localhost:3000
 
-## Notes
-
-- **No API keys on the frontend.** All AI calls go through the backend (`POST /ai/chat`).
-- The backend must be running and `OPENAI_API_KEY` must be set there.
