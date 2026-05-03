@@ -1,8 +1,7 @@
-// Global page enter animations via IntersectionObserver + cursor magnet bg
-export default defineNuxtPlugin(() => {
+ defineNuxtPlugin(() => {
   if (!import.meta.client) return
 
-  // ── Scroll reveal (IntersectionObserver) ─────────────────────────────────
+
   const observer = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
@@ -21,7 +20,6 @@ export default defineNuxtPlugin(() => {
     })
   }
 
-  // Run on each route change
   const router = useRouter()
   router.afterEach(() => {
     setTimeout(observe, 80)
