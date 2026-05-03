@@ -1,9 +1,6 @@
 <template>
   <div class="auth-shell">
     <canvas ref="canvasEl" class="auth-canvas"></canvas>
-    <div class="orb orb-1"></div>
-    <div class="orb orb-2"></div>
-    <div class="orb orb-3"></div>
     <div class="auth-content">
       <div class="auth-brand">
         <img src="/logo.png" class="auth-logo-img" alt="Chatra"/>
@@ -28,145 +25,358 @@ const langs = [
   { code: 'en' as const, label: 'EN' },
   { code: 'kk' as const, label: 'KZ' },
 ]
+
 const canvasEl = ref<HTMLCanvasElement | null>(null)
 let animId = 0
+let mouseX = -9999
+let mouseY = -9999
+let W = 0
+let H = 0
+
+function onMouse(e: MouseEvent) {
+  mouseX = e.clientX
+  mouseY = e.clientY
+}
 
 onMounted(() => {
-  const s = document.documentElement.style
-  const b = document.body.style
-  s.overflow = 'hidden'; s.height = '100%'; s.overscrollBehavior = 'none'
-  b.overflow = 'hidden'; b.height = '100%'; b.overscrollBehavior = 'none'
-})
-onUnmounted(() => {
-  const s = document.documentElement.style
-  const b = document.body.style
-  s.overflow = ''; s.height = ''; s.overscrollBehavior = ''
-  b.overflow = ''; b.height = ''; b.overscrollBehavior = ''
-})
+  document.documentElement.style.overflow = 'hidden'
+  document.body.style.overflow = 'hidden'
 
-onMounted(() => {
-  const c = canvasEl.value; if (!c) return
-  const ctx = c.getContext('2d'); if (!ctx) return
-  const resize = () => { c.width = window.innerWidth; c.height = window.innerHeight }
-  resize(); window.addEventListener('resize', resize)
-  const W = () => c.width, H = () => c.height
-  const labels = ['Math','Physics','AI','History','Chemistry','Biology','Code','English','∫dx','σ','E=mc²','DNA','Python','Newton','π','f(x)','Σ','∞']
-  const colors = [
-    {c:'#00B1C9',g:'rgba(0,177,201,0.6)'},{c:'#009aaf',g:'rgba(0,154,175,0.6)'},
-    {c:'#4dd6e8',g:'rgba(77,214,232,0.5)'},{c:'#06b6d4',g:'rgba(6,182,212,0.5)'},
-    {c:'#67e8f9',g:'rgba(103,232,249,0.45)'},{c:'#22d3ee',g:'rgba(34,211,238,0.5)'},
-    {c:'#0e7490',g:'rgba(14,116,144,0.4)'},{c:'#34d399',g:'rgba(52,211,153,0.4)'},
-  ]
-  interface Node { x:number;y:number;vx:number;vy:number;r:number;pulsePhase:number;pulseSpeed:number;color:string;glow:string;label:string;type:'hub'|'mid'|'small';trail:{x:number;y:number}[];trailMax:number;twinklePhase:number;twinkleSpeed:number }
-  const makeNode = (): Node => {
-    const col = colors[Math.floor(Math.random()*colors.length)]
-    const type = Math.random()<0.08?'hub':Math.random()<0.3?'mid':'small'
-    const spd = type==='hub'?0.15:type==='mid'?0.28:0.45
-    return { x:Math.random()*W(), y:Math.random()*H(), vx:(Math.random()-0.5)*spd, vy:(Math.random()-0.5)*spd,
-      r:type==='hub'?7+Math.random()*5:type==='mid'?4+Math.random()*3:2+Math.random()*2,
-      pulsePhase:Math.random()*Math.PI*2, pulseSpeed:0.018+Math.random()*0.025,
-      color:col.c, glow:col.g, label:labels[Math.floor(Math.random()*labels.length)], type,
-      trail:[], trailMax:type==='hub'?18:type==='mid'?10:5,
-      twinklePhase:Math.random()*Math.PI*2, twinkleSpeed:0.03+Math.random()*0.05 }
+  const c = canvasEl.value
+  if (!c) return
+  const ctx = c.getContext('2d')
+  if (!ctx) return
+
+  const doResize = () => {
+    W = c.width = window.innerWidth
+    H = c.height = window.innerHeight
   }
-  const nodes: Node[] = Array.from({length:100}, makeNode)
+  doResize()
+  window.addEventListener('resize', doResize)
+  window.addEventListener('mousemove', onMouse)
 
-  interface Signal { from:number;to:number;progress:number;speed:number;color:string;size:number }
-  const signals: Signal[] = []; let signalTimer = 0
-  interface Burst { x:number;y:number;r:number;maxR:number;alpha:number;color:string }
-  const bursts: Burst[] = []
-  interface Star { x:number;y:number;r:number;phase:number;speed:number }
-  const stars: Star[] = Array.from({length:70}, ()=>({x:Math.random()*1920,y:Math.random()*1080,r:0.3+Math.random()*1.2,phase:Math.random()*Math.PI*2,speed:0.008+Math.random()*0.018}))
-
-  const spawnSignal = () => {
-    const from = Math.floor(Math.random()*nodes.length), cands: number[] = []
-    for (let i=0;i<nodes.length;i++) { if(i===from) continue; const dx=nodes[i].x-nodes[from].x,dy=nodes[i].y-nodes[from].y; if(Math.sqrt(dx*dx+dy*dy)<210) cands.push(i) }
-    if (cands.length) { const to=cands[Math.floor(Math.random()*cands.length)]; signals.push({from,to,progress:0,speed:0.006+Math.random()*0.01,color:nodes[from].color,size:1.5+Math.random()*2}) }
+  interface Dot {
+    x: number; y: number
+    ox: number; oy: number
+    vx: number; vy: number
+    r: number; pulse: number
+    hue: number; speed: number
   }
-  const spawnBurst = (x:number,y:number,color:string) => bursts.push({x,y,r:0,maxR:20+Math.random()*30,alpha:0.7,color})
 
-  const CONNECT = 170; let t=0
-  const frame = () => {
-    animId = requestAnimationFrame(frame); t++
-    // White background
-    ctx.fillStyle='rgba(248,252,253,0.92)'; ctx.fillRect(0,0,W(),H())
-    // No stars on white background — skip
-    const bp=Math.sin(t*0.008)*0.15+0.85
-    for (const b of [{x:W()*0.15,y:H()*0.25,r:W()*0.38*bp,c:'rgba(0,177,201,0.06)'},{x:W()*0.82,y:H()*0.62,r:W()*0.32*bp,c:'rgba(6,182,212,0.05)'},{x:W()*0.5,y:H()*0.85,r:W()*0.28*bp,c:'rgba(0,177,201,0.05)'},{x:W()*0.7,y:H()*0.15,r:W()*0.2*bp,c:'rgba(0,154,175,0.04)'}]) {
-      const g=ctx.createRadialGradient(b.x,b.y,0,b.x,b.y,b.r); g.addColorStop(0,b.c); g.addColorStop(1,'transparent'); ctx.fillStyle=g; ctx.fillRect(0,0,W(),H())
+  interface Pulse {
+    ax: number; ay: number
+    bx: number; by: number
+    t: number; speed: number
+    hue: number
+  }
+
+  const COUNT = 90
+  const dots: Dot[] = Array.from({ length: COUNT }, () => {
+    const x = Math.random() * W
+    const y = Math.random() * H
+    const sp = 0.25 + Math.random() * 0.5
+    return {
+      x, y, ox: x, oy: y,
+      vx: (Math.random() - 0.5) * sp,
+      vy: (Math.random() - 0.5) * sp,
+      r: 2.2 + Math.random() * 3.2,
+      pulse: Math.random() * Math.PI * 2,
+      hue: 182 + Math.random() * 28,
+      speed: sp,
     }
-    for (const n of nodes) {
-      n.trail.push({x:n.x,y:n.y}); if(n.trail.length>n.trailMax) n.trail.shift()
-      n.x+=n.vx; n.y+=n.vy
-      if(n.x<0) n.vx=Math.abs(n.vx); if(n.x>W()) n.vx=-Math.abs(n.vx)
-      if(n.y<0) n.vy=Math.abs(n.vy); if(n.y>H()) n.vy=-Math.abs(n.vy)
-      n.pulsePhase+=n.pulseSpeed; n.twinklePhase+=n.twinkleSpeed
+  })
+
+  const pulses: Pulse[] = []
+  let pulseTimer = 0
+
+  function spawnPulse() {
+    const i = Math.floor(Math.random() * dots.length)
+    const a = dots[i]
+    const candidates: number[] = []
+    for (let j = 0; j < dots.length; j++) {
+      if (j === i) continue
+      const dx = dots[j].x - a.x
+      const dy = dots[j].y - a.y
+      if (Math.sqrt(dx * dx + dy * dy) < 150) candidates.push(j)
     }
-    for (const n of nodes) {
-      if(n.trail.length<2) continue; ctx.save()
-      for(let i=1;i<n.trail.length;i++){const p=i/n.trail.length;ctx.globalAlpha=p*0.18*(n.type==='hub'?1:n.type==='mid'?0.7:0.4);ctx.strokeStyle=n.color;ctx.lineWidth=p*(n.type==='hub'?2:1);ctx.beginPath();ctx.moveTo(n.trail[i-1].x,n.trail[i-1].y);ctx.lineTo(n.trail[i].x,n.trail[i].y);ctx.stroke()}
-      ctx.restore()
+    if (!candidates.length) return
+    const b = dots[candidates[Math.floor(Math.random() * candidates.length)]]
+    pulses.push({
+      ax: a.x, ay: a.y,
+      bx: b.x, by: b.y,
+      t: 0, speed: 0.012 + Math.random() * 0.018,
+      hue: a.hue,
+    })
+  }
+
+  const labels = ['∑', 'Δ', '∫', '∞', 'π', 'Ω', '√', '∂', 'AI', 'σ', 'λ', 'φ']
+  const floaters = Array.from({ length: labels.length }, (_, i) => ({
+    label: labels[i],
+    x: 0.06 + (i / labels.length) * 0.9,
+    yBase: 0.1 + Math.random() * 0.8,
+    phase: Math.random() * Math.PI * 2,
+    size: 13 + Math.random() * 8,
+  }))
+
+  const CONNECT = 150
+  let t = 0
+
+  const draw = () => {
+    animId = requestAnimationFrame(draw)
+    t++
+
+    ctx.fillStyle = '#dff0f4'
+    ctx.fillRect(0, 0, W, H)
+
+    // радиальные свечения
+    const glows = [
+      { x: W * 0.15, y: H * 0.2,  r: W * 0.45, a: 0.18 + Math.sin(t * 0.007) * 0.04 },
+      { x: W * 0.85, y: H * 0.75, r: W * 0.42, a: 0.14 + Math.sin(t * 0.009 + 1) * 0.03 },
+      { x: W * 0.5,  y: H * 0.5,  r: W * 0.35, a: 0.10 + Math.sin(t * 0.006 + 2) * 0.02 },
+      { x: W * 0.7,  y: H * 0.1,  r: W * 0.25, a: 0.08 },
+    ]
+    for (const g of glows) {
+      const grad = ctx.createRadialGradient(g.x, g.y, 0, g.x, g.y, g.r)
+      grad.addColorStop(0, `rgba(0,177,201,${g.a.toFixed(3)})`)
+      grad.addColorStop(0.5, `rgba(0,177,201,${(g.a * 0.3).toFixed(3)})`)
+      grad.addColorStop(1, 'rgba(0,177,201,0)')
+      ctx.fillStyle = grad
+      ctx.fillRect(0, 0, W, H)
     }
-    for (let i=0;i<nodes.length;i++) for(let j=i+1;j<nodes.length;j++){const dx=nodes[j].x-nodes[i].x,dy=nodes[j].y-nodes[i].y,d=Math.sqrt(dx*dx+dy*dy);if(d>CONNECT)continue;ctx.save();ctx.globalAlpha=(1-d/CONNECT)*0.25;const g=ctx.createLinearGradient(nodes[i].x,nodes[i].y,nodes[j].x,nodes[j].y);g.addColorStop(0,nodes[i].color);g.addColorStop(1,nodes[j].color);ctx.strokeStyle=g;ctx.lineWidth=0.8;ctx.beginPath();ctx.moveTo(nodes[i].x,nodes[i].y);ctx.lineTo(nodes[j].x,nodes[j].y);ctx.stroke();ctx.restore()}
-    for (let s=signals.length-1;s>=0;s--){const sig=signals[s];sig.progress+=sig.speed;if(sig.progress>=1){spawnBurst(nodes[sig.to].x,nodes[sig.to].y,sig.color);signals.splice(s,1);continue}const a=nodes[sig.from],b=nodes[sig.to],sx=a.x+(b.x-a.x)*sig.progress,sy=a.y+(b.y-a.y)*sig.progress,e=Math.sin(sig.progress*Math.PI),tl=0.06,tx=a.x+(b.x-a.x)*Math.max(0,sig.progress-tl),ty=a.y+(b.y-a.y)*Math.max(0,sig.progress-tl);ctx.save();const tg=ctx.createLinearGradient(tx,ty,sx,sy);tg.addColorStop(0,'transparent');tg.addColorStop(1,sig.color);ctx.globalAlpha=e*0.7;ctx.strokeStyle=tg;ctx.lineWidth=sig.size*0.6;ctx.beginPath();ctx.moveTo(tx,ty);ctx.lineTo(sx,sy);ctx.stroke();ctx.globalAlpha=e*0.95;ctx.shadowColor=sig.color;ctx.shadowBlur=14;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(sx,sy,sig.size,0,Math.PI*2);ctx.fill();ctx.restore()}
-    signalTimer++; if(signalTimer%14===0) spawnSignal()
-    for(let b=bursts.length-1;b>=0;b--){const bu=bursts[b];bu.r+=1.4;bu.alpha-=0.05;if(bu.alpha<=0){bursts.splice(b,1);continue}ctx.save();ctx.globalAlpha=bu.alpha*0.6;ctx.strokeStyle=bu.color;ctx.lineWidth=1.2;ctx.shadowColor=bu.color;ctx.shadowBlur=10;ctx.beginPath();ctx.arc(bu.x,bu.y,bu.r,0,Math.PI*2);ctx.stroke();ctx.restore()}
-    for (const n of nodes) {
-      const pulse=Math.sin(n.pulsePhase)*0.4+0.7,twinkle=Math.sin(n.twinklePhase)*0.3+0.85,r=n.r*pulse
+
+    // плавающие кольца
+    for (let i = 0; i < 5; i++) {
+      const rx = W * (0.15 + i * 0.185) + Math.sin(t * 0.006 + i * 1.2) * 35
+      const ry = H * (0.2 + Math.sin(t * 0.008 + i * 0.9) * 0.15)
+      const rr = 50 + i * 42 + Math.sin(t * 0.01 + i) * 12
+      const ra = 0.12 + Math.sin(t * 0.012 + i) * 0.05
       ctx.save()
-      if(n.type==='hub'){ctx.shadowColor=n.glow;ctx.shadowBlur=35;ctx.globalAlpha=0.25*twinkle;const og=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,r*4);og.addColorStop(0,n.color);og.addColorStop(1,'transparent');ctx.fillStyle=og;ctx.beginPath();ctx.arc(n.x,n.y,r*4,0,Math.PI*2);ctx.fill()}
-      ctx.shadowColor=n.glow;ctx.shadowBlur=n.type==='hub'?22:n.type==='mid'?14:7;ctx.globalAlpha=0.65*pulse*twinkle
-      const gr=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,r*2.5);gr.addColorStop(0,n.color);gr.addColorStop(0.5,n.glow);gr.addColorStop(1,'transparent');ctx.fillStyle=gr;ctx.beginPath();ctx.arc(n.x,n.y,r*2.5,0,Math.PI*2);ctx.fill()
-      ctx.globalAlpha=0.92*pulse*twinkle;ctx.shadowBlur=8
-      if(n.type!=='small'){const co=ctx.createRadialGradient(n.x-r*0.3,n.y-r*0.3,0,n.x,n.y,r);co.addColorStop(0,'#fff');co.addColorStop(0.4,n.color);co.addColorStop(1,n.color);ctx.fillStyle=co}else ctx.fillStyle=n.color
-      ctx.beginPath();ctx.arc(n.x,n.y,r,0,Math.PI*2);ctx.fill()
+      ctx.globalAlpha = ra
+      ctx.strokeStyle = `hsl(${190 + i * 5},80%,45%)`
+      ctx.lineWidth = 1.2
+      ctx.beginPath()
+      ctx.arc(rx, ry, rr, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.globalAlpha = ra * 0.4
+      ctx.beginPath()
+      ctx.arc(rx, ry, rr * 1.3, 0, Math.PI * 2)
+      ctx.stroke()
       ctx.restore()
-      if(n.type!=='small'){ctx.save();ctx.globalAlpha=(Math.sin(n.pulsePhase*0.3+1)*0.5+0.5)*0.6;ctx.fillStyle=n.color;ctx.font=`${n.type==='hub'?11:9}px 'Outfit',sans-serif`;ctx.textAlign='center';ctx.shadowColor=n.glow;ctx.shadowBlur=10;ctx.fillText(n.label,n.x,n.y-r-7);ctx.restore()}
+    }
+
+    // физика частиц
+    for (const d of dots) {
+      d.pulse += 0.026
+      const dx = mouseX - d.x
+      const dy = mouseY - d.y
+      const dist = Math.sqrt(dx * dx + dy * dy) || 1
+      if (dist < 240) {
+        const force = ((240 - dist) / 240) * 0.14
+        d.vx += (dx / dist) * force
+        d.vy += (dy / dist) * force
+      }
+      d.vx += (d.ox - d.x) * 0.018
+      d.vy += (d.oy - d.y) * 0.018
+      d.vx *= 0.83
+      d.vy *= 0.83
+      d.x += d.vx
+      d.y += d.vy
+    }
+
+    // линии соединений
+    for (let i = 0; i < dots.length; i++) {
+      for (let j = i + 1; j < dots.length; j++) {
+        const a = dots[i], b = dots[j]
+        const ddx = a.x - b.x, ddy = a.y - b.y
+        const dd = Math.sqrt(ddx * ddx + ddy * ddy)
+        if (dd > CONNECT) continue
+        const alpha = (1 - dd / CONNECT) * 0.65
+        ctx.save()
+        ctx.globalAlpha = alpha
+        const g = ctx.createLinearGradient(a.x, a.y, b.x, b.y)
+        g.addColorStop(0, `hsl(${a.hue},85%,45%)`)
+        g.addColorStop(1, `hsl(${b.hue},85%,45%)`)
+        ctx.strokeStyle = g
+        ctx.lineWidth = 1.0
+        ctx.beginPath()
+        ctx.moveTo(a.x, a.y)
+        ctx.lineTo(b.x, b.y)
+        ctx.stroke()
+        ctx.restore()
+      }
+    }
+
+    // бегущие импульсы
+    pulseTimer++
+    if (pulseTimer % 18 === 0) spawnPulse()
+    for (let i = pulses.length - 1; i >= 0; i--) {
+      const p = pulses[i]
+      p.t += p.speed
+      if (p.t >= 1) { pulses.splice(i, 1); continue }
+      const px = p.ax + (p.bx - p.ax) * p.t
+      const py = p.ay + (p.by - p.ay) * p.t
+      const ease = Math.sin(p.t * Math.PI)
+      ctx.save()
+      ctx.globalAlpha = ease * 0.95
+      ctx.shadowColor = `hsl(${p.hue},90%,55%)`
+      ctx.shadowBlur = 14
+      ctx.fillStyle = `hsl(${p.hue},95%,70%)`
+      ctx.beginPath()
+      ctx.arc(px, py, 3 + ease * 2, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
+    }
+
+    // точки-частицы
+    for (const d of dots) {
+      const p = Math.sin(d.pulse) * 0.3 + 0.7
+      const distToMouse = Math.sqrt((mouseX - d.x) ** 2 + (mouseY - d.y) ** 2)
+      const glow = Math.max(0, 1 - distToMouse / 240)
+      if (glow > 0.1) {
+        ctx.save()
+        ctx.globalAlpha = glow * 0.35
+        const og = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, d.r * 5)
+        og.addColorStop(0, `hsl(${d.hue},90%,55%)`)
+        og.addColorStop(1, `hsla(${d.hue},90%,55%,0)`)
+        ctx.fillStyle = og
+        ctx.beginPath()
+        ctx.arc(d.x, d.y, d.r * 5, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.restore()
+      }
+      ctx.save()
+      ctx.globalAlpha = p * 0.95
+      ctx.shadowColor = `hsl(${d.hue},95%,50%)`
+      ctx.shadowBlur = 10 + glow * 28
+      ctx.fillStyle = `hsl(${d.hue},92%,46%)`
+      ctx.beginPath()
+      ctx.arc(d.x, d.y, d.r * p + glow * 4, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.globalAlpha = 0.4 * p
+      ctx.fillStyle = '#fff'
+      ctx.beginPath()
+      ctx.arc(d.x - d.r * 0.25, d.y - d.r * 0.25, d.r * 0.35, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
+    }
+
+    // плавающие символы
+    for (const fl of floaters) {
+      const fx = fl.x * W
+      const fy = fl.yBase * H + Math.sin(t * 0.007 + fl.phase) * 22
+      const fa = 0.12 + Math.sin(t * 0.009 + fl.phase) * 0.06
+      ctx.save()
+      ctx.globalAlpha = fa
+      ctx.fillStyle = '#006e8a'
+      ctx.font = `500 ${fl.size}px 'Outfit', serif`
+      ctx.textAlign = 'center'
+      ctx.fillText(fl.label, fx, fy)
+      ctx.restore()
+    }
+
+    // курсор-прицел
+    if (mouseX > 0 && mouseX < W && mouseY > 0 && mouseY < H) {
+      ctx.save()
+      const cg = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 40)
+      cg.addColorStop(0, 'rgba(0,177,201,0.18)')
+      cg.addColorStop(1, 'rgba(0,177,201,0)')
+      ctx.fillStyle = cg
+      ctx.beginPath()
+      ctx.arc(mouseX, mouseY, 40, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.globalAlpha = 0.85
+      ctx.strokeStyle = '#00B1C9'
+      ctx.lineWidth = 1.5
+      ctx.beginPath()
+      ctx.arc(mouseX, mouseY, 12, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.globalAlpha = 0.35
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.arc(mouseX, mouseY, 24, 0, Math.PI * 2)
+      ctx.stroke()
+      ctx.globalAlpha = 0.6
+      ctx.lineWidth = 1
+      ctx.beginPath()
+      ctx.moveTo(mouseX - 6, mouseY); ctx.lineTo(mouseX - 14, mouseY)
+      ctx.moveTo(mouseX + 6, mouseY); ctx.lineTo(mouseX + 14, mouseY)
+      ctx.moveTo(mouseX, mouseY - 6); ctx.lineTo(mouseX, mouseY - 14)
+      ctx.moveTo(mouseX, mouseY + 6); ctx.lineTo(mouseX, mouseY + 14)
+      ctx.stroke()
+      ctx.globalAlpha = 1
+      ctx.fillStyle = '#00B1C9'
+      ctx.shadowColor = '#00B1C9'
+      ctx.shadowBlur = 16
+      ctx.beginPath()
+      ctx.arc(mouseX, mouseY, 3.5, 0, Math.PI * 2)
+      ctx.fill()
+      ctx.restore()
     }
   }
-  frame()
-  return () => { cancelAnimationFrame(animId); window.removeEventListener('resize',resize) }
+
+  draw()
+
+  onUnmounted(() => {
+    cancelAnimationFrame(animId)
+    window.removeEventListener('mousemove', onMouse)
+    window.removeEventListener('resize', doResize)
+    document.documentElement.style.overflow = ''
+    document.body.style.overflow = ''
+  })
 })
-onUnmounted(() => cancelAnimationFrame(animId))
 </script>
 
 <style scoped>
 .auth-shell {
   position: fixed; inset: 0;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  overflow: hidden; background: #f0f8fa;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  overflow: hidden;
   height: 100vh; height: 100dvh;
-  touch-action: none; overscroll-behavior: none;
-  padding-bottom: 10vh;
+  overscroll-behavior: none;
+  cursor: none;
 }
-.auth-canvas { position:absolute;inset:0;width:100%;height:100%;display:block }
-.orb { position:absolute;border-radius:50%;border:1px solid transparent;pointer-events:none;animation:orbit-spin linear infinite }
-.orb-1 { width:500px;height:500px;top:50%;left:50%;transform:translate(-50%,-50%);border-color:rgba(0,177,201,0.12);animation-duration:60s;box-shadow:0 0 60px rgba(0,177,201,0.06) inset }
-.orb-2 { width:800px;height:800px;top:50%;left:50%;transform:translate(-50%,-50%);border-color:rgba(6,182,212,0.08);animation-duration:90s;animation-direction:reverse }
-.orb-3 { width:1100px;height:1100px;top:50%;left:50%;transform:translate(-50%,-50%);border-color:rgba(0,177,201,0.05);animation-duration:130s }
-@keyframes orbit-spin { from{transform:translate(-50%,-50%) rotate(0deg)} to{transform:translate(-50%,-50%) rotate(360deg)} }
+.auth-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+}
 .auth-content {
   position: relative; z-index: 10;
   display: flex; flex-direction: column; align-items: center;
-  gap: 28px; padding: 24px 20px;
-  width: 100%; max-width: 440px; margin: 0 auto;
+  gap: 20px; padding: 24px 20px;
+  width: 100%; max-width: 440px;
   overflow-y: auto; overflow-x: hidden;
-  max-height: calc(100dvh - 10vh);
-  -webkit-overflow-scrolling: touch;
+  max-height: 100dvh;
   scrollbar-width: none;
-  animation: content-enter 0.7s cubic-bezier(0.16,1,0.3,1) both;
+  cursor: default;
+  animation: content-enter 0.65s cubic-bezier(0.16,1,0.3,1) both;
 }
 .auth-content::-webkit-scrollbar { display: none; }
-@keyframes content-enter { from{opacity:0;transform:translateY(24px) scale(0.97)} to{opacity:1;transform:translateY(0) scale(1)} }
-.auth-brand { display:flex;align-items:center;justify-content:center;flex-shrink:0;animation:brand-enter 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s both }
-@keyframes brand-enter { from{opacity:0;transform:translateY(-12px)} to{opacity:1;transform:translateY(0)} }
-.auth-logo-img { width:180px;height:auto;object-fit:contain }
-
+@keyframes content-enter {
+  from { opacity: 0; transform: translateY(30px) scale(0.96); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.auth-brand {
+  flex-shrink: 0;
+  animation: brand-drop 0.55s cubic-bezier(0.16,1,0.3,1) 0.1s both;
+}
+@keyframes brand-drop {
+  from { opacity: 0; transform: translateY(-18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.auth-logo-img { width: 160px; height: auto; object-fit: contain; display: block; }
 .lang-switcher {
   display: flex; align-items: center; gap: 4px;
-  background: rgba(255,255,255,0.75); backdrop-filter: blur(10px);
-  border: 1px solid rgba(0,177,201,0.2); border-radius: 30px;
+  background: rgba(255,255,255,0.88); backdrop-filter: blur(14px);
+  border: 1px solid rgba(0,177,201,0.25); border-radius: 30px;
   padding: 4px; flex-shrink: 0;
+  box-shadow: 0 2px 14px rgba(0,177,201,0.15);
+  animation: fade-in-up 0.5s cubic-bezier(0.16,1,0.3,1) 0.18s both;
+}
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 .lang-btn {
   padding: 5px 14px; border-radius: 24px; font-size: 12px; font-weight: 700;
@@ -176,22 +386,16 @@ onUnmounted(() => cancelAnimationFrame(animId))
 .lang-btn:hover { color: #00B1C9; }
 .lang-btn.active {
   background: #00B1C9; color: #fff;
-  box-shadow: 0 2px 8px rgba(0,177,201,0.35);
+  box-shadow: 0 2px 8px rgba(0,177,201,0.4);
 }
-
 @media (max-width:768px) {
-  .auth-shell { padding-bottom: 8vh; }
-  .auth-content { padding: 16px 12px; gap: 12px; max-width: 100%; width: 100%; max-height: calc(100dvh - 8vh); }
+  .auth-shell { cursor: default; }
+  .auth-content { padding: 14px 12px; gap: 14px; max-width: 100%; }
   .auth-logo-img { width: 110px; }
-  .orb-1 { width: 300px; height: 300px; }
-  .orb-2 { width: 500px; height: 500px; }
-  .orb-3 { width: 700px; height: 700px; }
   .lang-btn { padding: 5px 12px; font-size: 11px; }
 }
 @media (max-width:480px) {
-  .auth-shell { padding-bottom: 6vh; }
-  .auth-content { padding: 12px 10px; gap: 10px; max-height: calc(100dvh - 6vh); }
+  .auth-content { padding: 10px; gap: 10px; }
   .auth-logo-img { width: 90px; }
-  .lang-btn { padding: 5px 10px; }
 }
 </style>

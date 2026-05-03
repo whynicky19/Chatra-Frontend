@@ -21,6 +21,7 @@ type NuxtAppInjections =
   InjectionType<typeof import("../../node_modules/nuxt/dist/pages/runtime/plugins/check-if-page-unused.js")> &
   InjectionType<typeof import("../../node_modules/nuxt/dist/app/plugins/warn.dev.server.js")> &
   InjectionType<typeof import("../../node_modules/nuxt/dist/app/plugins/check-if-layout-used.js")> &
+  InjectionType<typeof import("../../plugins/animations.client")> &
   InjectionType<typeof import("../../plugins/auth.client")>
 
 declare module '#app' {

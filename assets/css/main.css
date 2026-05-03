@@ -131,11 +131,11 @@ html.dark ::-webkit-scrollbar-thumb:hover{background:rgba(0,177,201,.4)}
 .anim-scale{animation:scaleIn .22s cubic-bezier(.16,1,.3,1)}
 .anim-down{animation:slideDown .22s cubic-bezier(.16,1,.3,1)}
 
-/* Page transitions */
-.page-enter-active{transition:all .25s cubic-bezier(.16,1,.3,1)}
-.page-leave-active{transition:all .18s ease}
-.page-enter-from{opacity:0;transform:translateX(14px)}
-.page-leave-to{opacity:0;transform:translateX(-8px)}
+/* Page transitions — overridden below */
+.page-enter-active-old{transition:none}
+.page-leave-active-old{transition:none}
+.page-enter-from-old{opacity:1}
+.page-leave-to-old{opacity:1}
 
 /* ====== BUTTONS ====== */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:var(--r-md);font-size:14px;font-weight:500;font-family:'Outfit',sans-serif;transition:all .2s cubic-bezier(.34,1.56,.64,1);cursor:pointer;border:none;white-space:nowrap;letter-spacing:.01em;position:relative;overflow:hidden}
@@ -255,4 +255,232 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Outfit', sans-serif; }
 @media (max-width: 480px) {
   .modal { padding: 16px 12px 28px; }
   .btn-lg { font-size: 15px; }
+}
+
+/* ====== УЛУЧШЕННЫЕ PAGE TRANSITIONS ====== */
+.page-enter-active {
+  transition: opacity 0.32s cubic-bezier(0.16,1,0.3,1), transform 0.32s cubic-bezier(0.16,1,0.3,1);
+}
+.page-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(12px) scale(0.99);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-8px) scale(0.99);
+}
+
+/* ====== SCROLL REVEAL ====== */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.45s cubic-bezier(0.16,1,0.3,1), transform 0.45s cubic-bezier(0.16,1,0.3,1);
+}
+.reveal.reveal-left {
+  transform: translateX(-18px);
+}
+.reveal.reveal-right {
+  transform: translateX(18px);
+}
+.reveal.reveal-scale {
+  transform: scale(0.96);
+}
+.reveal.revealed {
+  opacity: 1;
+  transform: none;
+}
+.reveal-delay-1 { transition-delay: 0.07s; }
+.reveal-delay-2 { transition-delay: 0.14s; }
+.reveal-delay-3 { transition-delay: 0.21s; }
+.reveal-delay-4 { transition-delay: 0.28s; }
+
+/* ====== УЛУЧШЕННЫЕ HOVER ЭФФЕКТЫ ====== */
+.btn {
+  transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+}
+.btn-teal:hover, .btn-blue:hover, .btn-purple:hover {
+  transform: translateY(-2px) scale(1.01);
+}
+.btn:active {
+  transform: scale(0.96) !important;
+  transition: transform 0.08s !important;
+}
+
+/* NuxtLink / карточки — плавный hover */
+.sb-item {
+  transition: background 0.15s, color 0.15s, transform 0.15s;
+}
+.sb-item:hover {
+  transform: translateX(2px);
+}
+@media (max-width:768px) {
+  .sb-item:hover { transform: none; }
+}
+
+/* Карточки */
+.scard, .class-card, .card {
+  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.2s;
+}
+.scard:hover, .class-card:hover, .card:hover {
+  transform: translateY(-3px);
+}
+
+/* ====== LOADING SKELETON SHIMMER ====== */
+.skeleton {
+  background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: var(--r-md);
+}
+
+/* ====== INPUT FOCUS УЛУЧШЕНИЯ ====== */
+.input {
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+}
+.input:focus {
+  border-color: var(--teal);
+  box-shadow: 0 0 0 3px rgba(0,177,201,0.12), 0 0 20px rgba(0,177,201,0.06);
+}
+
+/* ====== MODAL ENTER/LEAVE ====== */
+.modal-enter-active {
+  animation: modal-in 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.modal-leave-active {
+  animation: modal-out 0.18s ease;
+}
+@keyframes modal-in {
+  from { opacity:0; transform:scale(0.94) translateY(12px); }
+  to   { opacity:1; transform:scale(1) translateY(0); }
+}
+@keyframes modal-out {
+  from { opacity:1; transform:scale(1); }
+  to   { opacity:0; transform:scale(0.96); }
+}
+
+/* ====== TOAST ====== */
+.toast-enter-active { animation: toast-in 0.3s cubic-bezier(0.16,1,0.3,1); }
+.toast-leave-active { animation: toast-out 0.2s ease; }
+@keyframes toast-in {
+  from { opacity:0; transform:translateX(32px) scale(0.95); }
+  to   { opacity:1; transform:translateX(0) scale(1); }
+}
+@keyframes toast-out {
+  from { opacity:1; transform:translateX(0); }
+  to   { opacity:0; transform:translateX(32px); }
+}
+
+/* ====== CHAT MESSAGE ENTER ====== */
+@keyframes msg-in {
+  from { opacity:0; transform:translateY(8px) scale(0.97); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+.chat-msg {
+  animation: msg-in 0.25s cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ====== MOBILE УЛУЧШЕНИЯ ====== */
+@media (max-width:768px) {
+  /* Плавный скролл на iOS */
+  * { -webkit-overflow-scrolling: touch; }
+
+  /* Активные состояния для сенсорных */
+  .btn:active, .sb-item:active, .e-chip:active {
+    transform: scale(0.96) !important;
+    transition: transform 0.08s !important;
+  }
+
+  /* Убираем tap highlight */
+  a, button, .sb-item {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Нижняя навигация — тень */
+  .sb {
+    box-shadow: 0 -2px 16px rgba(0,0,0,0.08) !important;
+  }
+
+  /* Лучший отступ снизу на iOS */
+  .shell-main {
+    padding-bottom: env(safe-area-inset-bottom, 60px);
+  }
+
+  /* Плавное открытие модалок снизу */
+  .modal {
+    animation: slide-up 0.32s cubic-bezier(0.16,1,0.3,1);
+  }
+  @keyframes slide-up {
+    from { transform:translateY(100%); opacity:0; }
+    to   { transform:translateY(0); opacity:1; }
+  }
+
+  /* Overlay fade */
+  .overlay {
+    animation: overlay-in 0.22s ease;
+  }
+  @keyframes overlay-in {
+    from { opacity:0; }
+    to   { opacity:1; }
+  }
+
+  /* Chip buttons — крупнее на мобиле */
+  .e-chip {
+    padding: 9px 16px;
+    font-size: 13px;
+  }
+
+  /* Лучший скролл чатов */
+  .chat-area {
+    overscroll-behavior: contain;
+  }
+}
+
+/* ====== ACTIVE NAVIGATION INDICATOR ====== */
+.sb-item.active {
+  position: relative;
+}
+.sb-item.active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  height: 60%;
+  width: 3px;
+  background: var(--teal);
+  border-radius: 0 3px 3px 0;
+}
+@media (max-width:768px) {
+  .sb-item.active::before { display: none; }
+  .sb-item.active::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 2px;
+    background: var(--teal);
+    border-radius: 2px;
+  }
+}
+
+/* ====== SMOOTH SCROLLBAR ====== */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(0,177,201,0.2); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(0,177,201,0.45); }
+
+/* ====== DARK MODE SMOOTH TRANSITION ====== */
+html {
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* ====== ТИПОГРАФИЯ МОБИЛЕ ====== */
+@media (max-width:480px) {
+  .pg-title, .page-title { font-size: 18px !important; }
+  .modal-title { font-size: 15px !important; }
+  .auth-title { font-size: 18px !important; }
 }

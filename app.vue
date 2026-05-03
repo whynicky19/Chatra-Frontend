@@ -1,13 +1,12 @@
 <template>
   <NuxtLayout>
-    <NuxtPage />
+    <NuxtPage :transition="{ name: 'page', mode: 'out-in' }" />
   </NuxtLayout>
 </template>
 <script setup lang="ts">
 import { onMounted } from 'vue'
 
 onMounted(() => {
-  // Apply saved theme on startup
   if (import.meta.client) {
     const theme = localStorage.getItem('theme')
     if (theme === 'dark') {
