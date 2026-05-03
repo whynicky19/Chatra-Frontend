@@ -27,8 +27,9 @@ onMounted(async () => {
       const chats = await chatsSvc.list()
       chatsStore.setChats(chats)
       chats.forEach((c: any) => connectWs(c.id))
-      // предзагружаем сообщения для превью в списке чатов
-      await Promise.all(chats.map((c: any) => loadMsgs(c.id)))
+      // Lazy: load only first 5 chats for preview, rest load on demand
+      const preview = chats.slice(0, 5)
+      await Promise.all(preview.map((c: any) => loadMsgs(c.id)))
     } catch {}
 
     startChatPoller()
@@ -36,9 +37,14 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  if (import.meta.client && (window as any).__chatPollInterval) {
-    clearInterval((window as any).__chatPollInterval)
-    delete (window as any).__chatPollInterval
+  if (import.meta.client) {
+    // Clean up poll interval
+    if ((window as any).__chatPollInterval) {
+      clearInterval((window as any).__chatPollInterval)
+      delete (window as any).__chatPollInterval
+    }
+    // Disconnect all WebSockets to prevent leaks
+    chatsStore.disconnectAll()
   }
 })
 </script>
@@ -47,10 +53,9 @@ onUnmounted(() => {
 .shell-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 @media (max-width:768px){
   .shell{flex-direction:column;overflow:hidden;width:100%;max-width:100vw}
-  .shell-main{overflow:hidden;width:100%;max-width:100vw;overflow-x:hidden;padding-bottom:60px;box-sizing:border-box}
+  .shell-main{overflow:hidden;width:100%;max-width:100vw;overflow-x:hidden;padding-bottom:calc(60px + env(safe-area-inset-bottom, 0px));box-sizing:border-box}
 }
 @media (max-width:480px){
-  .shell-main{padding-bottom:56px}
+  .shell-main{padding-bottom:calc(56px + env(safe-area-inset-bottom, 0px))}
 }
-@media (max-width:480px){}
 </style>

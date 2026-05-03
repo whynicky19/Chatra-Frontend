@@ -4,16 +4,5 @@
   </NuxtLayout>
 </template>
 <script setup lang="ts">
-import { onMounted } from 'vue'
-
-onMounted(() => {
-  if (import.meta.client) {
-    const theme = localStorage.getItem('theme')
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }
-})
+// Theme is applied via inline <head> script in nuxt.config.ts to prevent flash
 </script>

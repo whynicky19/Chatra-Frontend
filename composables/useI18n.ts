@@ -185,6 +185,11 @@ export const translations: Record<string, Record<Lang, string>> = {
   'register.pw_medium': { ru: 'Средний', en: 'Medium', kk: 'Орташа' },
   'register.pw_strong': { ru: 'Надёжный', en: 'Strong', kk: 'Сенімді' },
 
+  // Deadlines
+  'deadline.in_hours_1': { ru: 'СРОК ЧЕРЕЗ {n} ЧАС', en: 'DUE IN {n} HOUR', kk: 'МЕРЗІМ {n} САҒАТ' },
+  'deadline.in_hours': { ru: 'СРОК ЧЕРЕЗ {n} ЧАСА', en: 'DUE IN {n} HOURS', kk: 'МЕРЗІМ {n} САҒАТТА' },
+  'deadline.tomorrow': { ru: 'ЗАВТРА', en: 'TOMORROW', kk: 'ЕРТЕҢ' },
+
   // General
   'general.loading': { ru: 'Загрузка...', en: 'Loading...', kk: 'Жүктелуде...' },
   'general.error': { ru: 'Ошибка', en: 'Error', kk: 'Қате' },

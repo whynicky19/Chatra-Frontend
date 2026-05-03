@@ -274,44 +274,6 @@ onMounted(() => {
       ctx.restore()
     }
 
-    // курсор-прицел
-    if (mouseX > 0 && mouseX < W && mouseY > 0 && mouseY < H) {
-      ctx.save()
-      const cg = ctx.createRadialGradient(mouseX, mouseY, 0, mouseX, mouseY, 40)
-      cg.addColorStop(0, 'rgba(0,177,201,0.18)')
-      cg.addColorStop(1, 'rgba(0,177,201,0)')
-      ctx.fillStyle = cg
-      ctx.beginPath()
-      ctx.arc(mouseX, mouseY, 40, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.globalAlpha = 0.85
-      ctx.strokeStyle = '#00B1C9'
-      ctx.lineWidth = 1.5
-      ctx.beginPath()
-      ctx.arc(mouseX, mouseY, 12, 0, Math.PI * 2)
-      ctx.stroke()
-      ctx.globalAlpha = 0.35
-      ctx.lineWidth = 1
-      ctx.beginPath()
-      ctx.arc(mouseX, mouseY, 24, 0, Math.PI * 2)
-      ctx.stroke()
-      ctx.globalAlpha = 0.6
-      ctx.lineWidth = 1
-      ctx.beginPath()
-      ctx.moveTo(mouseX - 6, mouseY); ctx.lineTo(mouseX - 14, mouseY)
-      ctx.moveTo(mouseX + 6, mouseY); ctx.lineTo(mouseX + 14, mouseY)
-      ctx.moveTo(mouseX, mouseY - 6); ctx.lineTo(mouseX, mouseY - 14)
-      ctx.moveTo(mouseX, mouseY + 6); ctx.lineTo(mouseX, mouseY + 14)
-      ctx.stroke()
-      ctx.globalAlpha = 1
-      ctx.fillStyle = '#00B1C9'
-      ctx.shadowColor = '#00B1C9'
-      ctx.shadowBlur = 16
-      ctx.beginPath()
-      ctx.arc(mouseX, mouseY, 3.5, 0, Math.PI * 2)
-      ctx.fill()
-      ctx.restore()
-    }
   }
 
   draw()
@@ -334,7 +296,7 @@ onMounted(() => {
   overflow: hidden;
   height: 100vh; height: 100dvh;
   overscroll-behavior: none;
-  cursor: none;
+  cursor: default;
 }
 .auth-canvas {
   position: absolute; inset: 0;

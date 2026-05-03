@@ -338,9 +338,12 @@ const fmtDeadline = (d: string) => {
   if (!d) return ''
   try {
     const diff = new Date(d).getTime() - Date.now()
-    const hrs = Math.round(diff/3600000)
-    if (hrs < 24) return `СРОК ЧЕРЕЗ ${hrs} ЧАС${hrs===1?'':'А'}`
-    return `ЗАВТРА, ${new Date(d).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`
+    const hrs = Math.round(diff / 3600000)
+    if (hrs < 24) {
+      const key = hrs === 1 ? 'deadline.in_hours_1' : 'deadline.in_hours'
+      return t(key).replace('{n}', String(hrs))
+    }
+    return `${t('deadline.tomorrow')}, ${new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
   } catch { return d }
 }
 

@@ -23,6 +23,13 @@ export default defineNuxtConfig({
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
         { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap' },
       ],
+      script: [
+        {
+          // Inline script runs before paint — eliminates dark mode flash
+          innerHTML: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.classList.add('dark');else if(t==='light')document.documentElement.classList.remove('dark');else if(window.matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.classList.add('dark');}catch(e){}})();`,
+          type: 'text/javascript',
+        },
+      ],
     },
     pageTransition: { name: 'page', mode: 'out-in' },
   },

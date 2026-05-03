@@ -150,15 +150,18 @@ const sub = async () => {
 .nick-hint{font-size:12px;font-weight:500;margin-top:4px}
 .nick-hint.ok{color:var(--green)}.nick-hint.err{color:var(--red)}
 .str-row{display:flex;align-items:center;gap:10px;margin-top:6px}
-.str-bar{flex:1;height:3px;background:var(--surface3);border-radius:3px;overflow:hidden;max-width:100px}
+.str-bar{flex:1;height:3px;background:#e8eef0;border-radius:3px;overflow:hidden;max-width:100px}
 .str-fill{height:100%;border-radius:3px;transition:all .3s}
-.str-lbl{font-size:11px;color:var(--text4)}
-.auth-link-row{text-align:center;font-size:13px;color:var(--text3);margin-top:20px}
+.str-lbl{font-size:11px;color:#7aabb5}
+.auth-link-row{text-align:center;font-size:13px;color:#4a7a86;margin-top:20px}
+.input{background:#f5fafb!important;border-color:rgba(0,177,201,0.2)!important;color:#0d2d33!important}
+.input:focus{border-color:rgba(0,177,201,0.5)!important;box-shadow:0 0 0 3px rgba(0,177,201,0.1)!important}
+.input::placeholder{color:#7aabb5!important}
 
 /* Выпадающий список групп */
 .group-dropdown{position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid rgba(0,177,201,0.3);border-radius:var(--r-md);box-shadow:0 4px 20px rgba(0,0,0,0.1);z-index:100;max-height:200px;overflow-y:auto;margin-top:2px}
 .group-item{padding:10px 14px;font-size:14px;color:#0d2d33;cursor:pointer;transition:background .15s}
-.group-item:hover{background:var(--teal-l, #e6f9fb);color:var(--teal)}
+.group-item:hover{background:#e6f9fb;color:#00B1C9}
 
 @media (max-width:768px) {
   .auth-card { padding: 20px 14px 24px; border-radius: var(--r-xl); max-width: 100%; width: 100%; box-shadow: none; border: 1px solid rgba(0,177,201,0.15); }

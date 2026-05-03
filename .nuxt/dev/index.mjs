@@ -2015,7 +2015,7 @@ async function errorHandler(error, event) {
 
 const rootDir = "C:/Users/Asus/Desktop/Projects/Chatra/frontend";
 
-const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1"}],"link":[{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"}],"style":[],"script":[],"noscript":[],"title":"Chatra"};
+const appHead = {"meta":[{"charset":"utf-8"},{"name":"viewport","content":"width=device-width, initial-scale=1"}],"link":[{"rel":"preconnect","href":"https://fonts.googleapis.com"},{"rel":"stylesheet","href":"https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"}],"style":[],"script":[{"innerHTML":"(function(){try{var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.classList.add('dark');else if(t==='light')document.documentElement.classList.remove('dark');else if(window.matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.classList.add('dark');}catch(e){}})();","type":"text/javascript"}],"noscript":[],"title":"Chatra"};
 
 const appRootTag = "div";
 
@@ -2119,16 +2119,16 @@ _wH6JrtIxmaSoA8lCPWFnE9z4lQeXW6H5z3l5aymEQw
 const assets = {
   "/index.mjs": {
     "type": "text/javascript; charset=utf-8",
-    "etag": "\"1a29d-+TqR0Xj/OtOjzzSVgP5sidXtF7g\"",
-    "mtime": "2026-05-03T10:46:35.110Z",
-    "size": 107165,
+    "etag": "\"1a266-zcFAW6dz/5S+iTe8EIHWL/O7sC8\"",
+    "mtime": "2026-05-03T11:45:08.318Z",
+    "size": 107110,
     "path": "index.mjs"
   },
   "/index.mjs.map": {
     "type": "application/json",
-    "etag": "\"6a31b-2Ovzjn73eLOd0HIK8CgfE/9d4co\"",
-    "mtime": "2026-05-03T10:46:35.110Z",
-    "size": 434971,
+    "etag": "\"6a30c-nn7ZAt2P3pXPzxBHHGLx5MYuogg\"",
+    "mtime": "2026-05-03T11:45:08.318Z",
+    "size": 434956,
     "path": "index.mjs.map"
   }
 };

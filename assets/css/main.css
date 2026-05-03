@@ -66,10 +66,6 @@ html.dark {
   --teal-d:#007a8e;
   --teal-l:rgba(0,177,201,.12);
   --teal-m:rgba(0,177,201,.2);
-  --purple:var(--teal);
-  --purple-h:var(--teal-h);
-  --purple-l:var(--teal-l);
-  --purple-m:var(--teal-m);
   --bg:#080e10;
   --bg2:#0d1618;
   --surface:#111b1e;
@@ -384,8 +380,11 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Outfit', sans-serif; }
 
 /* ====== MOBILE УЛУЧШЕНИЯ ====== */
 @media (max-width:768px) {
-  /* Плавный скролл на iOS */
-  * { -webkit-overflow-scrolling: touch; }
+  /* Убираем pull-to-refresh на body */
+  body { overscroll-behavior: none; }
+
+  /* Плавный скролл на iOS — используем стандартное свойство */
+  .pg-body, .modal, .chats-scroll, .sb-nav { -webkit-overflow-scrolling: touch; }
 
   /* Активные состояния для сенсорных */
   .btn:active, .sb-item:active, .e-chip:active {
@@ -403,9 +402,9 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Outfit', sans-serif; }
     box-shadow: 0 -2px 16px rgba(0,0,0,0.08) !important;
   }
 
-  /* Лучший отступ снизу на iOS */
+  /* Лучший отступ снизу на iOS с учётом safe-area */
   .shell-main {
-    padding-bottom: env(safe-area-inset-bottom, 60px);
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
   }
 
   /* Плавное открытие модалок снизу */

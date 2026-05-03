@@ -47,7 +47,7 @@
             <div v-for="cls in visibleClasses" :key="cls.id" class="class-card" @click="goClass(cls.id)">
               <!-- Cover image -->
               <div class="card-cover" :style="cls.cover_image ? {} : {background: coverGrad(cls.id)}">
-                <img v-if="cls.cover_image" :src="cls.cover_image" class="card-cover-img"/>
+                <img v-if="cls.cover_image" :src="cls.cover_image" class="card-cover-img" loading="lazy" decoding="async"/>
                 <!-- Code chip for teachers -->
                 <div v-if="auth.isTeacher || auth.isAdmin" class="card-code-chip" @click.stop="copyClassCode(cls.id)">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
@@ -268,9 +268,12 @@ const fmtDeadline = (d: string) => {
   if (!d) return ''
   try {
     const diff = new Date(d).getTime() - Date.now()
-    const hrs = Math.round(diff/3600000)
-    if (hrs < 24) return `СРОК ЧЕРЕЗ ${hrs} ЧАС${hrs===1?'':'А'}`
-    return `ЗАВТРА, ${new Date(d).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`
+    const hrs = Math.round(diff / 3600000)
+    if (hrs < 24) {
+      const key = hrs === 1 ? 'deadline.in_hours_1' : 'deadline.in_hours'
+      return t(key).replace('{n}', String(hrs))
+    }
+    return `${t('deadline.tomorrow')}, ${new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
   } catch { return d }
 }
 
