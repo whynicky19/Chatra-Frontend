@@ -66,6 +66,11 @@
     </div>
 
     <div class="sb-bottom">
+      <!-- Mobile language switcher (hidden on desktop — shown in page header) -->
+      <div class="lang-switch-mobile">
+        <button v-for="l in [{code:'ru',label:'RU'},{code:'en',label:'EN'},{code:'kk',label:'KZ'}]" :key="l.code"
+          :class="['lang-btn-mob', { active: lang === l.code }]" @click.stop="setLang(l.code as any)">{{ l.label }}</button>
+      </div>
       <a href="https://t.me/whynicky" target="_blank" class="sb-item help-item" :title="t('chats.help_center')">
         <div class="item-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
@@ -154,67 +159,87 @@ onMounted(() => {
 .ai-quota-dot.red{background:var(--red)}
 .fio-nudge{display:flex;align-items:center;gap:8px;margin:0 6px 8px;padding:10px 12px;background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);border-radius:var(--r-md);font-size:12px;font-weight:600;color:#b45309;cursor:pointer;transition:background .15s;}
 .fio-nudge:hover{background:rgba(245,158,11,.18);}
+.lang-switch-mobile{display:none}
 
 @media (max-width:768px){
   .sb{
     position:fixed!important;
-    bottom:0;left:0;right:0;top:auto!important;
-    width:100%!important;
-    height:60px;
+    bottom:calc(12px + env(safe-area-inset-bottom, 0px));left:12px;right:12px;top:auto!important;
+    width:auto!important;
+    height:64px;
     flex-direction:row;
     border-right:none;
-    border-top:1px solid var(--border);
+    border:1px solid var(--border);
+    border-radius:24px;
     z-index:200;
     overflow:visible;
     background:var(--surface);
-    box-shadow:0 -2px 8px rgba(0,0,0,0.06);
+    box-shadow:0 8px 32px rgba(0,120,140,0.18),0 2px 8px rgba(0,0,0,0.08);
+    padding:0 8px;
   }
-  .sb.collapsed{width:100%!important}
+  html.dark .sb{
+    box-shadow:0 8px 32px rgba(0,0,0,0.5),0 2px 8px rgba(0,0,0,0.3);
+    border-color:var(--border2);
+  }
+  .sb.collapsed{width:auto!important}
   .sb-logo{display:none}
   .lang-switch{display:none}
   .fio-nudge{display:none}
   .sb-nav{
     flex-direction:row;
     flex:1;
-    padding:0;
-    gap:0;
+    padding:8px 0;
+    gap:4px;
     overflow:visible;
-    align-items:stretch;
+    align-items:center;
     justify-content:space-around;
   }
   .sb-item{
     flex-direction:column;
-    padding:6px 4px 4px;
-    gap:2px;
-    border-radius:0;
+    padding:8px 16px;
+    gap:3px;
+    border-radius:16px;
     justify-content:center;
     align-items:center;
     flex:1;
     min-width:44px;
-    min-height:44px;
+    min-height:48px;
     white-space:nowrap;
+    transition:all .2s cubic-bezier(.34,1.56,.64,1);
   }
   .sb-item .item-label{display:none}
-  .sb-item.active{background:transparent;border-left:none}
-  .sb-item.active .item-icon{color:var(--teal)}
-  .sb-item.active .item-icon svg{stroke:var(--teal)}
-  .item-icon{width:24px;height:24px}
+  .sb-item.active{
+    background:var(--teal) !important;
+    color:#fff !important;
+    transform:scale(1.08);
+    box-shadow:0 4px 16px rgba(0,177,201,0.4);
+    border-left:none;
+  }
+  .sb-item.active .item-icon{color:#fff}
+  .sb-item.active .item-icon svg{stroke:#fff}
+  .sb-item.active::before{display:none}
+  .sb-item.active::after{display:none}
+  .sb-item:not(.active):hover{background:var(--teal-l)}
+  .item-icon{width:22px;height:22px}
+  .notif-dot{border-color:var(--surface)}
   .notif-pill{display:none}
   .sb-bottom{
     flex-direction:row;
     border-top:none;
-    padding:0;
-    gap:0;
+    padding:8px 0;
+    gap:4px;
+    align-items:center;
   }
   .sb-bottom .sb-item{flex:1}
   .help-item{display:none}
-  .collapsed .sb-item{justify-content:center;padding:6px 4px 4px}
+  .collapsed .sb-item{justify-content:center}
   .collapsed .sb-logo{display:none}
+  .lang-switch-mobile{display:none}
 }
 @media (max-width:480px){
-  .sb{height:56px}
-  .sb-item{min-width:40px}
-  .item-icon{width:22px;height:22px}
+  .sb{bottom:10px;left:10px;right:10px;height:60px}
+  .sb-item{padding:6px 12px;min-height:44px}
+  .item-icon{width:20px;height:20px}
 }
 
 </style>

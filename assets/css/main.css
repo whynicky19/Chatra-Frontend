@@ -215,8 +215,15 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Outfit', sans-serif; }
 /* ====== MOBILE ====== */
 @media (max-width: 768px) {
   html { font-size: 14px; }
-  body { overflow: hidden; }
-  #__nuxt { overflow: hidden; }
+  body {
+    overflow: hidden;
+    background: var(--bg);
+  }
+  #__nuxt {
+    overflow: hidden;
+    height: 100vh;
+    background: var(--bg);
+  }
 
   /* Full-screen modal on mobile — bottom sheet */
   .overlay { padding: 0; align-items: flex-end; background: rgba(0,20,26,0.6); }
@@ -402,9 +409,9 @@ h1,h2,h3,h4,h5,h6 { font-family: 'Outfit', sans-serif; }
     box-shadow: 0 -2px 16px rgba(0,0,0,0.08) !important;
   }
 
-  /* Лучший отступ снизу на iOS с учётом safe-area */
+  /* Отступ снизу = высота навигации + отступ 12px + safe-area iPhone */
   .shell-main {
-    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(76px + env(safe-area-inset-bottom, 0px));
   }
 
   /* Плавное открытие модалок снизу */

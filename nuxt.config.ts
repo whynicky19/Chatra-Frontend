@@ -1,6 +1,5 @@
-import { fileURLToPath } from 'node:url'
-
 export default defineNuxtConfig({
+  ssr: false, // SPA mode — fixes "Not authenticated" on page refresh (token only in localStorage)
   devtools: { enabled: false },
   compatibilityDate: '2024-04-03',
   modules: ['@pinia/nuxt'],
@@ -17,7 +16,7 @@ export default defineNuxtConfig({
       title: 'Chatra',
       meta: [
         { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1' },
+        { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
       ],
       link: [
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -37,11 +36,4 @@ export default defineNuxtConfig({
     pageTransition: { name: 'page', mode: 'out-in' },
   },
   typescript: { strict: false, typeCheck: false },
-  vite: {
-    resolve: {
-      alias: {
-        '#app-manifest': fileURLToPath(new URL('./.nuxt/manifest/meta/dev.json', import.meta.url)),
-      },
-    },
-  },
 })

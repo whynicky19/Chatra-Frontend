@@ -52,10 +52,10 @@ onUnmounted(() => {
 .shell{display:flex;height:100vh;overflow:hidden;background:var(--bg)}
 .shell-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
 @media (max-width:768px){
-  .shell{flex-direction:column;overflow:hidden;width:100%;max-width:100vw}
-  .shell-main{overflow:hidden;width:100%;max-width:100vw;overflow-x:hidden;padding-bottom:calc(60px + env(safe-area-inset-bottom, 0px));box-sizing:border-box}
+  .shell{flex-direction:column;overflow:hidden;width:100%;max-width:100vw;height:100vh}
+  .shell-main{overflow:hidden;width:100%;max-width:100vw;overflow-x:hidden;height:100%;padding-bottom:calc(76px + env(safe-area-inset-bottom, 0px));box-sizing:border-box}
 }
 @media (max-width:480px){
-  .shell-main{padding-bottom:calc(56px + env(safe-area-inset-bottom, 0px))}
+  .shell-main{padding-bottom:calc(72px + env(safe-area-inset-bottom, 0px))}
 }
 </style>

@@ -1,1 +1,0 @@
-export { default } from "file:///C:/Users/Asus/Desktop/Projects/Chatra/frontend/node_modules/@nuxt/vite-builder/dist/vite-node-entry.mjs"
