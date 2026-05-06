@@ -2,7 +2,7 @@
 
 Nuxt 3 + Vue 3 + Pinia frontend for the Chatra education platform.
 
-## Quick start.
+## Quick start
 
 ### 1. Configure environment
 
