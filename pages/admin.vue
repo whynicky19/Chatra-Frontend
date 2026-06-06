@@ -235,13 +235,13 @@
               <div class="cl-avatar">{{ (cl.name||'?')[0].toUpperCase() }}</div>
               <div class="cl-info">
                 <div class="cl-name">{{ cl.name }}</div>
-                <div class="cl-sub">Создал: {{ creatorName(cl.created_by) }}</div>
+                <div class="cl-sub">{{ cl.teacher || creatorName(cl.created_by) }}{{ cl.group ? ' · ' + cl.group : '' }}</div>
               </div>
             </div>
             <div class="cl-footer">
               <span class="cl-count">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-                {{ cl.member_count ?? '—' }} участников
+                ID: {{ cl.id }}
               </span>
               <button class="btn btn-ghost btn-sm" @click="openMembers(cl.id)">Участники</button>
             </div>
@@ -326,17 +326,38 @@ const switchToAiUsage = () => { tab.value = 'ai-usage'; if (!aiLogs.value.length
 // ── Classes ───────────────────────────────────────────────────────────────────
 const classes = ref<any[]>([]); const loadingCl = ref(false)
 const showMembers = ref(false); const membersList = ref<any[]>([]); const loadingMembers = ref(false)
-const creatorName = (id: number) => { const u = users.value.find(u => u.id === id); return u ? (u.full_name || u.email) : '#' + id }
+const creatorName = (id: number) => { const u = users.value.find(u => u.id === id); return u ? (u.full_name || u.email) : id ? '#' + id : '—' }
+
+const loadClassesFromPosts = async () => {
+  const allPosts = await postsSvc.list()
+  const classPosts = allPosts.filter((p: any) => {
+    try { return JSON.parse(p.body).type === 'class' } catch { return false }
+  })
+  return classPosts.map((p: any) => {
+    let body: any = {}
+    try { body = JSON.parse(p.body) } catch {}
+    return {
+      id: p.id,
+      name: p.title,
+      created_by: p.author_id ?? p.created_by ?? null,
+      member_count: null,
+      description: body.description || '',
+      teacher: body.teacher || '',
+      group: body.group || '',
+    }
+  })
+}
+
 const openMembers = async (classId: number) => {
   showMembers.value = true; membersList.value = []; loadingMembers.value = true
-  try { membersList.value = await classesSvc.members(classId) } catch { toast.err('Ошибка загрузки участников') }
+  try { membersList.value = await classesSvc.members(classId) } catch {}
   finally { loadingMembers.value = false }
 }
 const switchToClasses = async () => {
   tab.value = 'classes'
   if (classes.value.length || loadingCl.value) return
   loadingCl.value = true
-  try { const cls = await classesSvc.listAll(); classes.value = cls; classesCount.value = cls.length } catch { toast.err('Ошибка загрузки классов') }
+  try { classes.value = await loadClassesFromPosts(); classesCount.value = classes.value.length } catch { toast.err('Ошибка загрузки классов') }
   finally { loadingCl.value = false }
 }
 
@@ -362,7 +383,7 @@ onMounted(async () => {
   loadingU.value = true
   try { users.value = await adminSvc.users() } catch {} finally { loadingU.value = false }
   try { const c = await chatsSvc.list(); chatsCount.value = c.length } catch {}
-  try { const cls = await classesSvc.listAll(); classesCount.value = cls.length; classes.value = cls } catch {}
+  try { classes.value = await loadClassesFromPosts(); classesCount.value = classes.value.length } catch {}
   loadAiSummary()
 })
 </script>
