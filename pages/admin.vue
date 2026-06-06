@@ -290,9 +290,9 @@
                 <div :class="['av','av-sm',colorFor(m.id)]">{{ (m.full_name||m.email||'?')[0].toUpperCase() }}</div>
                 <div class="member-info">
                   <div class="member-name">{{ m.full_name || m.email.split('@')[0] }}</div>
-                  <div class="member-email">{{ m.email }}</div>
+                  <div class="member-email">{{ m.email }}{{ m.group ? ' · ' + m.group : '' }}</div>
                 </div>
-                <span :class="['badge', m.role==='teacher'?'badge-gray':'badge-gray']" style="font-size:10px">{{ m.role }}</span>
+                <span class="badge badge-gray" style="font-size:10px">{{ m.role }}</span>
               </div>
             </div>
           </div>
@@ -323,13 +323,14 @@ import { useAuthStore } from '~/stores/auth.store'
 import { useToast } from '~/composables/useToast'
 import { useAdminSvc } from '~/services/admin'
 import { useClassesSvc } from '~/services/classes'
+import { useAssignmentsSvc } from '~/services/assignments'
 import { useChatsSvc } from '~/services/chats'
 import { usePostsSvc } from '~/services/posts'
 import { useI18n } from '~/composables/useI18n'
 definePageMeta({ layout: 'default' })
 const auth = useAuthStore(); const toast = useToast(); const adminSvc = useAdminSvc()
 const { t, lang } = useI18n()
-const chatsSvc = useChatsSvc(); const postsSvc = usePostsSvc(); const classesSvc = useClassesSvc()
+const chatsSvc = useChatsSvc(); const postsSvc = usePostsSvc(); const classesSvc = useClassesSvc(); const assignSvc = useAssignmentsSvc()
 const tab = ref('users'); const users = ref<any[]>([]); const loadingU = ref(false); const sq = ref(''); const showCreate = ref(false); const crU = ref(false)
 const togglingAi = ref<Record<number, boolean>>({})
 const nu = ref({ e: '', p: '', r: 'student' }); const chatsCount = ref(0); const classesCount = ref(0)
@@ -375,7 +376,8 @@ const loadClassesFromPosts = async () => {
     return {
       id: p.id,
       name: p.title,
-      created_by: p.author_id ?? p.created_by ?? null,
+      // body.created_by is stored by CreateClassModal; fall back to any post-level field
+      created_by: body.created_by ?? p.author_id ?? p.user_id ?? p.created_by ?? null,
       cover_image: body.cover_image || null,
       description: body.description || '',
       teacher: body.teacher || '',
@@ -388,7 +390,26 @@ const openClass = async (cl: any) => {
   selectedClass.value = cl
   showMembers.value = true
   membersList.value = []; loadingMembers.value = true
-  try { membersList.value = await classesSvc.members(cl.id) } catch {}
+  try {
+    const memberIds = new Set<number>()
+
+    // 1. Users who called the join API
+    const joinMembers: any[] = await classesSvc.members(cl.id).catch(() => [])
+    joinMembers.forEach(m => memberIds.add(m.id))
+
+    // 2. Users who submitted work in this class (tracked in assignment system)
+    const assignments: any[] = await assignSvc.list(cl.id).catch(() => [])
+    const subLists = await Promise.all(
+      assignments.map(a => assignSvc.getSubmissions(a.id).catch(() => []))
+    )
+    subLists.flat().forEach((s: any) => { if (s.student_id) memberIds.add(s.student_id) })
+
+    // 3. The creator (if tracked)
+    if (cl.created_by) memberIds.add(cl.created_by)
+
+    // Resolve to full user objects from the admin users list
+    membersList.value = users.value.filter(u => memberIds.has(u.id))
+  } catch {}
   finally { loadingMembers.value = false }
 }
 const switchToClasses = async () => {

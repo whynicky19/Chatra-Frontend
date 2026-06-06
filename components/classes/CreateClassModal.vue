@@ -88,9 +88,11 @@
 import { ref } from 'vue'
 import { useToast } from '~/composables/useToast'
 import { usePostsSvc } from '~/services/posts'
+import { useAuthStore } from '~/stores/auth.store'
 import { useApi } from '~/services/api'
 const emit = defineEmits<{close:[]; created:[p:any]}>()
 const postsSvc = usePostsSvc(); const toast = useToast(); const api = useApi()
+const auth = useAuthStore()
 const title = ref(''); const period = ref(''); const teacher = ref(''); const description = ref(''); const loading = ref(false)
 const coverPreview = ref<string|null>(null); const coverBase64 = ref<string|null>(null)
 const fileInput = ref<HTMLInputElement|null>(null)
@@ -145,7 +147,8 @@ const submit = async () => {
       description: description.value, members: 1, color: '',
       cover_image: coverBase64.value || '',
       group: group.value || '',
-      default_criteria: defaultCriteria.value.filter(c => c.name.trim() && c.weight > 0)
+      default_criteria: defaultCriteria.value.filter(c => c.name.trim() && c.weight > 0),
+      created_by: auth.user?.id ?? null,
     })
     const p = await postsSvc.create(title.value, body)
     toast.ok('Класс создан'); emit('created', p)
