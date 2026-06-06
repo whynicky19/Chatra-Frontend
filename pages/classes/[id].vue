@@ -719,6 +719,13 @@ const onSubmitted = (sub: Submission) => {
 }
 
 onMounted(async () => {
+  // Open a specific tab if passed via query param (e.g. from calendar deadlines)
+  const qTab = route.query.tab as string
+  if (qTab === 'assignments' || qTab === 'materials' || qTab === 'ai') {
+    tab.value = qTab
+    if (qTab === 'assignments') loadAssignments()
+  }
+
   loading.value = true
   try { const posts = await postsSvc.list(); allPosts.value = posts } catch { toast.err(t('general.error')) } finally { loading.value = false }
   if (!isTeacher.value) loadRating()

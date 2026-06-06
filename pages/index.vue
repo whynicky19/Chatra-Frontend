@@ -14,6 +14,14 @@
               {{ t('classes.create') }}
             </button>
             <button class="btn btn-teal" @click="showJoin=true">{{ t('classes.join_code') }}</button>
+            <NuxtLink to="/calendar" class="btn btn-head-icon" title="Дедлайны">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              <span class="btn-head-label">Дедлайны</span>
+            </NuxtLink>
+            <NuxtLink to="/notifications" class="btn btn-head-icon" title="Уведомления">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+              <span class="btn-head-label">Уведомления</span>
+            </NuxtLink>
             <!-- Lang switcher (mobile-visible) -->
             <div class="head-lang-switch">
               <button v-for="l in [{code:'ru',label:'RU'},{code:'en',label:'EN'},{code:'kk',label:'KZ'}]" :key="l.code"
@@ -47,21 +55,16 @@
           </div>
 
           <template v-else>
-
             <div v-for="cls in visibleClasses" :key="cls.id" class="class-card" @click="goClass(cls.id)">
               <div class="card-cover" :style="cls.cover_image ? {backgroundImage:`url(${cls.cover_image})`,backgroundSize:'cover',backgroundPosition:'center'} : {background: coverGrad(cls.id)}">
-
                 <div v-if="auth.isTeacher || auth.isAdmin" class="card-code-chip" @click.stop="copyClassCode(cls.id)">
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
                   {{ codeFor(cls.id) }}
                 </div>
-
                 <button v-if="auth.isTeacher || auth.isAdmin" class="card-edit-btn" @click.stop="openEditClass(cls)" title="Редактировать">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </button>
               </div>
-
-
               <div class="card-body">
                 <div class="card-title-row">
                   <h3 class="card-name">{{ cls.title }}</h3>
@@ -70,7 +73,6 @@
                   </div>
                 </div>
                 <p class="card-desc">{{ cls.description || (lang==='ru' ? 'Нажмите для просмотра' : lang==='kk' ? 'Көру үшін басыңыз' : 'Click to view') }}</p>
-
                 <div class="card-teacher" v-if="cls.teacher_name || cls.teacher">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                   {{ cls.teacher_name || cls.teacher }}
@@ -81,17 +83,13 @@
                 </div>
                 <div class="card-footer">
                   <div class="card-action-row">
-                    <button v-if="!auth.isTeacher" class="card-action-btn" @click.stop="goClass(cls.id)">
-                      {{ getActionLabel(cls) }} →
-                    </button>
-                    <button v-else class="card-action-btn" @click.stop="goClass(cls.id)">
-                      {{ lang === 'ru' ? 'Открыть курс' : lang === 'kk' ? 'Курсты ашу' : 'Open course' }} →
-                    </button>
+                    <button v-if="!auth.isTeacher" class="card-action-btn" @click.stop="goClass(cls.id)">{{ getActionLabel(cls) }} →</button>
+                    <button v-else class="card-action-btn" @click.stop="goClass(cls.id)">{{ lang === 'ru' ? 'Открыть курс' : lang === 'kk' ? 'Курсты ашу' : 'Open course' }} →</button>
                     <div class="card-controls">
                       <button v-if="!auth.isTeacher" class="ctrl-btn" @click.stop="leaveClass(cls.id)" :title="t('classes.left')">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
                       </button>
-                      <button v-if="auth.isTeacher" class="ctrl-btn ctrl-del" @click.stop="confirmDelete(cls)">
+                      <button v-if="auth.isTeacher" class="ctrl-del ctrl-btn" @click.stop="confirmDelete(cls)">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
                       </button>
                     </div>
@@ -100,33 +98,14 @@
               </div>
             </div>
 
-
             <div v-if="!auth.isTeacher && !auth.isAdmin" class="class-card add-card" @click="showJoin=true">
               <div class="add-card-inner">
-                <div class="add-plus">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
-                </div>
+                <div class="add-plus"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg></div>
                 <div class="add-title">{{ lang === 'ru' ? 'Добавить новый предмет в программу' : lang === 'kk' ? 'Бағдарламаға жаңа пән қосу' : 'Add new subject to program' }}</div>
                 <div class="add-sub">{{ lang === 'ru' ? 'Персонализируйте своё обучение' : lang === 'kk' ? 'Оқуыңызды жекелендіріңіз' : 'Personalize your learning' }}</div>
               </div>
             </div>
           </template>
-        </div>
-
-
-        <div v-if="upcomingAssignments.length" class="deadlines-section">
-          <div class="deadlines-label">{{ t('classes.upcoming') }}</div>
-          <div class="deadlines-list">
-            <div v-for="a in upcomingAssignments" :key="a.id" class="deadline-item">
-              <div class="deadline-icon">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/></svg>
-              </div>
-              <div class="deadline-info">
-                <div class="deadline-title">{{ a.title }}</div>
-                <div class="deadline-time">{{ fmtDeadline(a.deadline) }}</div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -327,25 +306,6 @@ const foundClass = computed(() => {
   return allClasses.value.find(c => codeFor(c.id) === joinCode.value.toUpperCase()) || null
 })
 
-const upcomingAssignments = computed(() => {
-  const now = new Date()
-  return allPosts.value
-    .filter(p => { try { const b=JSON.parse(p.body); return b.type==='assignment' && b.deadline && new Date(b.deadline) > now } catch { return false } })
-    .map(p => { try { const b=JSON.parse(p.body); return {...b, id:p.id, title:p.title} } catch { return null } })
-    .filter(Boolean).slice(0, 3)
-})
-const fmtDeadline = (d: string) => {
-  if (!d) return ''
-  try {
-    const diff = new Date(d).getTime() - Date.now()
-    const hrs = Math.round(diff / 3600000)
-    if (hrs < 24) {
-      const key = hrs === 1 ? 'deadline.in_hours_1' : 'deadline.in_hours'
-      return t(key).replace('{n}', String(hrs))
-    }
-    return `${t('deadline.tomorrow')}, ${new Date(d).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-  } catch { return d }
-}
 
 const openEditClass = (cls: any) => {
   editingClass.value = cls
@@ -414,7 +374,7 @@ const copyClassCode = (id: number) => {
 }
 const onCreated = async (cls: any) => { showCreate.value=false; await load(); if (cls?.id && !joinedIds.value.includes(cls.id)) { joinedIds.value.push(cls.id); saveJoined() } }
 const load = async () => { loading.value=true; try { allPosts.value=await postsSvc.list() } catch { toast.err(t('general.error')) } finally { loading.value=false } }
-onMounted(()=>{ loadJoined(); load() })
+onMounted(() => { loadJoined(); load() })
 
 // Re-load joined IDs whenever the logged-in user changes (fixes disappearing classes after re-login)
 watch(() => auth.user?.id, (newId) => { if (newId) loadJoined() })
@@ -444,6 +404,10 @@ watch(() => auth.user?.id, (newId) => { if (newId) loadJoined() })
 .toggle-track.dark{background:var(--teal-d,#1a3a44);border-color:var(--teal)}
 .toggle-thumb{width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.18);position:absolute;left:2px;display:flex;align-items:center;justify-content:center;transition:transform .25s cubic-bezier(.34,1.56,.64,1);color:#888}
 .toggle-track.dark .toggle-thumb{transform:translateX(20px);color:var(--teal)}
+
+/* Header nav buttons */
+.btn-head-icon{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:var(--r-md);border:1.5px solid var(--border2);background:var(--surface);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none;font-family:inherit;white-space:nowrap}
+.btn-head-icon:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-l)}
 
 /* Grid */
 .classes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:24px;margin-bottom:32px;width:100%}
@@ -484,16 +448,6 @@ watch(() => auth.user?.id, (newId) => { if (newId) loadJoined() })
 .add-card:hover .add-plus{border-color:var(--teal);color:var(--teal)}
 .add-title{font-size:15px;font-weight:700;color:var(--text2);line-height:1.3}
 .add-sub{font-size:13px;color:var(--text4);max-width:160px;line-height:1.5}
-
-/* Deadlines */
-.deadlines-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);padding:20px 22px}
-.deadlines-label{font-size:11px;font-weight:800;color:var(--text4);letter-spacing:.1em;margin-bottom:14px}
-.deadlines-list{display:flex;flex-direction:column;gap:12px}
-.deadline-item{display:flex;align-items:center;gap:12px}
-.deadline-icon{width:34px;height:34px;border-radius:var(--r-sm);background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text4);flex-shrink:0}
-.deadline-info{flex:1}
-.deadline-title{font-size:13px;font-weight:600;color:var(--text1)}
-.deadline-time{font-size:11px;font-weight:700;color:var(--teal);letter-spacing:.05em;margin-top:2px}
 
 /* Empty state */
 .empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 40px;gap:12px;text-align:center}
@@ -545,6 +499,8 @@ watch(() => auth.user?.id, (newId) => { if (newId) loadJoined() })
   .pg-sub{text-align:left;margin:0}
   .head-lang-switch{display:flex}
   .btn-outline-teal{min-height:44px}
+  .btn-head-icon .btn-head-label{display:none}
+  .btn-head-icon{padding:8px 10px}
   .classes-grid{grid-template-columns:1fr;gap:14px}
   .card-cover{height:160px}
   .add-card{min-height:120px}
@@ -552,7 +508,6 @@ watch(() => auth.user?.id, (newId) => { if (newId) loadJoined() })
   .ctrl-btn{width:36px;height:36px}
   .code-box{width:40px;height:48px;font-size:18px}
   .code-boxes{gap:6px}
-  .deadlines-section{padding:16px}
 }
 @media (max-width:480px){
   .content-area{padding:12px 10px 80px}

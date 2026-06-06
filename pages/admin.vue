@@ -32,6 +32,7 @@
       <div class="tabs" style="margin-bottom:20px">
         <button :class="['tab-btn',{active:tab==='users'}]" @click="tab='users'">Пользователи</button>
         <button :class="['tab-btn',{active:tab==='actions'}]" @click="tab='actions'">Действия</button>
+        <button :class="['tab-btn',{active:tab==='classes'}]" @click="switchToClasses">Классы</button>
         <button :class="['tab-btn','tab-ai-btn',{active:tab==='ai-usage'}]" @click="switchToAiUsage">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           Запросы к ИИ
@@ -225,6 +226,47 @@
           </button>
         </div>
       </div>
+      <!-- Classes tab -->
+      <div v-else-if="tab==='classes'">
+        <div v-if="loadingCl" style="display:flex;justify-content:center;padding:24px"><div class="spinner"></div></div>
+        <div v-else class="cl-grid">
+          <div v-for="cl in classes" :key="cl.id" class="cl-card">
+            <div class="cl-card-head">
+              <div class="cl-avatar">{{ (cl.name||'?')[0].toUpperCase() }}</div>
+              <div class="cl-info">
+                <div class="cl-name">{{ cl.name }}</div>
+                <div class="cl-sub">Создал: {{ creatorName(cl.created_by) }}</div>
+              </div>
+            </div>
+            <div class="cl-footer">
+              <span class="cl-count">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                {{ cl.member_count ?? '—' }} участников
+              </span>
+              <button class="btn btn-ghost btn-sm" @click="openMembers(cl.id)">Участники</button>
+            </div>
+          </div>
+          <div v-if="!classes.length" style="padding:24px;color:var(--text4);font-size:13px">Классов нет</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Members modal -->
+    <div v-if="showMembers" class="overlay" @click.self="showMembers=false">
+      <div class="modal anim-scale" style="max-width:420px">
+        <div class="modal-head"><span class="modal-title">Участники класса</span><button class="btn btn-icon btn-ghost" @click="showMembers=false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+        <div v-if="loadingMembers" style="display:flex;justify-content:center;padding:24px"><div class="spinner"></div></div>
+        <div v-else class="members-list">
+          <div v-for="m in membersList" :key="m.id" class="member-row">
+            <div :class="['av','av-sm',colorFor(m.id)]">{{ (m.full_name||m.email||'?')[0].toUpperCase() }}</div>
+            <div class="member-info">
+              <div class="member-name">{{ m.full_name || m.email.split('@')[0] }}</div>
+              <div class="member-email">{{ m.email }}</div>
+            </div>
+          </div>
+          <div v-if="!membersList.length" style="padding:16px;text-align:center;color:var(--text4);font-size:13px">Участников нет</div>
+        </div>
+      </div>
     </div>
 
     <!-- Create user modal -->
@@ -249,13 +291,14 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '~/stores/auth.store'
 import { useToast } from '~/composables/useToast'
 import { useAdminSvc } from '~/services/admin'
+import { useClassesSvc } from '~/services/classes'
 import { useChatsSvc } from '~/services/chats'
 import { usePostsSvc } from '~/services/posts'
 import { useI18n } from '~/composables/useI18n'
 definePageMeta({ layout: 'default' })
 const auth = useAuthStore(); const toast = useToast(); const adminSvc = useAdminSvc()
 const { t, lang } = useI18n()
-const chatsSvc = useChatsSvc(); const postsSvc = usePostsSvc()
+const chatsSvc = useChatsSvc(); const postsSvc = usePostsSvc(); const classesSvc = useClassesSvc()
 const tab = ref('users'); const users = ref<any[]>([]); const loadingU = ref(false); const sq = ref(''); const showCreate = ref(false); const crU = ref(false)
 const togglingAi = ref<Record<number, boolean>>({})
 const nu = ref({ e: '', p: '', r: 'student' }); const chatsCount = ref(0); const classesCount = ref(0)
@@ -280,6 +323,23 @@ const loadAiSummary = async () => { try { aiSummary.value = await adminSvc.aiUsa
 const setClassFilter = (classId: number | null) => { aiFilterClass.value = aiFilterClass.value === classId ? null : classId; loadAiUsage(1) }
 const switchToAiUsage = () => { tab.value = 'ai-usage'; if (!aiLogs.value.length && !aiLoading.value) loadAiUsage(1) }
 
+// ── Classes ───────────────────────────────────────────────────────────────────
+const classes = ref<any[]>([]); const loadingCl = ref(false)
+const showMembers = ref(false); const membersList = ref<any[]>([]); const loadingMembers = ref(false)
+const creatorName = (id: number) => { const u = users.value.find(u => u.id === id); return u ? (u.full_name || u.email) : '#' + id }
+const openMembers = async (classId: number) => {
+  showMembers.value = true; membersList.value = []; loadingMembers.value = true
+  try { membersList.value = await classesSvc.members(classId) } catch { toast.err('Ошибка загрузки участников') }
+  finally { loadingMembers.value = false }
+}
+const switchToClasses = async () => {
+  tab.value = 'classes'
+  if (classes.value.length || loadingCl.value) return
+  loadingCl.value = true
+  try { const cls = await classesSvc.listAll(); classes.value = cls; classesCount.value = cls.length } catch { toast.err('Ошибка загрузки классов') }
+  finally { loadingCl.value = false }
+}
+
 // ── User actions ──────────────────────────────────────────────────────────────
 const toggleAiUnlimited = async (u: any) => {
   togglingAi.value = { ...togglingAi.value, [u.id]: true }
@@ -302,7 +362,7 @@ onMounted(async () => {
   loadingU.value = true
   try { users.value = await adminSvc.users() } catch {} finally { loadingU.value = false }
   try { const c = await chatsSvc.list(); chatsCount.value = c.length } catch {}
-  try { const p = await postsSvc.list(); classesCount.value = p.filter((x: any) => { try { return JSON.parse(x.body).type === 'class' } catch { return false } }).length } catch {}
+  try { const cls = await classesSvc.listAll(); classesCount.value = cls.length; classes.value = cls } catch {}
   loadAiSummary()
 })
 </script>
@@ -356,6 +416,22 @@ onMounted(async () => {
 .ai-type-chat{background:rgba(59,130,246,.08);color:#3b82f6;border-color:rgba(59,130,246,.2)}
 .token-badge{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:var(--r-sm);background:var(--surface2);color:var(--text1);font-variant-numeric:tabular-nums}
 .ai-pagination{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px}
+/* Classes */
+.cl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.cl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--sh-xs)}
+.cl-card-head{display:flex;align-items:center;gap:12px}
+.cl-avatar{width:40px;height:40px;border-radius:var(--r-md);background:var(--teal-l);color:var(--teal);font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cl-info{flex:1;min-width:0}
+.cl-name{font-size:14px;font-weight:600;color:var(--text1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-sub{font-size:12px;color:var(--text4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-footer{display:flex;align-items:center;justify-content:space-between}
+.cl-count{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3)}
+.members-list{display:flex;flex-direction:column;max-height:360px;overflow-y:auto;padding:0 4px}
+.member-row{display:flex;align-items:center;gap:10px;padding:10px 8px;border-bottom:1px solid var(--border)}
+.member-row:last-child{border-bottom:none}
+.member-info{flex:1;min-width:0}
+.member-name{font-size:13px;font-weight:500;color:var(--text1)}
+.member-email{font-size:12px;color:var(--text4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @keyframes spin{to{transform:rotate(360deg)}}
 .spin{animation:spin .7s linear infinite}
 

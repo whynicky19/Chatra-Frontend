@@ -5,6 +5,7 @@ interface User { id: number; email: string; is_active: boolean; role: string; ai
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     token: null as string | null,
+    refreshToken: null as string | null,
     user: null as User | null,
     nickname: '' as string,
     fullname: '' as string,
@@ -21,6 +22,11 @@ export const useAuthStore = defineStore('auth', {
     setToken(t: string) {
       this.token = t
       if (import.meta.client) localStorage.setItem('_tk', t)
+    },
+
+    setRefreshToken(t: string) {
+      this.refreshToken = t
+      if (import.meta.client) localStorage.setItem('_rtk', t)
     },
 
     setUser(u: User) {
@@ -52,17 +58,23 @@ export const useAuthStore = defineStore('auth', {
 
     logout() {
       this.token = null
+      this.refreshToken = null
       this.user = null
       this.nickname = ''
       this.fullname = ''
       this.avatar = ''
-      if (import.meta.client) localStorage.removeItem('_tk')
+      if (import.meta.client) {
+        localStorage.removeItem('_tk')
+        localStorage.removeItem('_rtk')
+      }
     },
 
     loadFromStorage() {
       if (import.meta.client) {
         const t = localStorage.getItem('_tk')
         if (t) this.token = t
+        const rt = localStorage.getItem('_rtk')
+        if (rt) this.refreshToken = rt
       }
     },
 

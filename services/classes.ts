@@ -30,5 +30,9 @@ export const useClassesSvc = () => {
     delete: async (classId: number): Promise<void> => {
       await api.delete(`/classes/${classId}`)
     },
+    members: async (classId: number): Promise<any[]> => {
+      const { data } = await api.get(`/admin/classes/${classId}/members`)
+      return data as any[]
+    },
   }
 }

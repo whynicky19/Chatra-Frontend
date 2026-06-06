@@ -14,6 +14,7 @@ export const useAuth = () => {
       resetLogoutFlag()
       const t = await svc.login(email, pw)
       auth.setToken(t.access_token)
+      if (t.refresh_token) auth.setRefreshToken(t.refresh_token)
       const u = await svc.me()
       auth.setUser(u)
 
