@@ -230,20 +230,16 @@
       <div v-else-if="tab==='classes'">
         <div v-if="loadingCl" style="display:flex;justify-content:center;padding:24px"><div class="spinner"></div></div>
         <div v-else class="cl-grid">
-          <div v-for="cl in classes" :key="cl.id" class="cl-card">
-            <div class="cl-card-head">
-              <div class="cl-avatar">{{ (cl.name||'?')[0].toUpperCase() }}</div>
-              <div class="cl-info">
-                <div class="cl-name">{{ cl.name }}</div>
-                <div class="cl-sub">{{ cl.teacher || creatorName(cl.created_by) }}{{ cl.group ? ' · ' + cl.group : '' }}</div>
-              </div>
+          <div v-for="cl in classes" :key="cl.id" class="cl-card" @click="openClass(cl)">
+            <div class="cl-cover" :style="cl.cover_image ? `background-image:url(${cl.cover_image})` : `background:${coverGrad(cl.id)}`">
             </div>
-            <div class="cl-footer">
-              <span class="cl-count">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-                ID: {{ cl.id }}
-              </span>
-              <button class="btn btn-ghost btn-sm" @click="openMembers(cl.id)">Участники</button>
+            <div class="cl-body">
+              <div class="cl-name">{{ cl.name }}</div>
+              <div class="cl-sub">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                {{ cl.teacher || creatorName(cl.created_by) }}
+                <template v-if="cl.group"> · {{ cl.group }}</template>
+              </div>
             </div>
           </div>
           <div v-if="!classes.length" style="padding:24px;color:var(--text4);font-size:13px">Классов нет</div>
@@ -251,20 +247,55 @@
       </div>
     </div>
 
-    <!-- Members modal -->
+    <!-- Class detail modal -->
     <div v-if="showMembers" class="overlay" @click.self="showMembers=false">
-      <div class="modal anim-scale" style="max-width:420px">
-        <div class="modal-head"><span class="modal-title">Участники класса</span><button class="btn btn-icon btn-ghost" @click="showMembers=false"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-        <div v-if="loadingMembers" style="display:flex;justify-content:center;padding:24px"><div class="spinner"></div></div>
-        <div v-else class="members-list">
-          <div v-for="m in membersList" :key="m.id" class="member-row">
-            <div :class="['av','av-sm',colorFor(m.id)]">{{ (m.full_name||m.email||'?')[0].toUpperCase() }}</div>
-            <div class="member-info">
-              <div class="member-name">{{ m.full_name || m.email.split('@')[0] }}</div>
-              <div class="member-email">{{ m.email }}</div>
+      <div class="modal anim-scale cl-detail-modal">
+        <!-- Cover header -->
+        <div class="cl-modal-cover" :style="selectedClass?.cover_image ? `background-image:url(${selectedClass.cover_image})` : `background:${coverGrad(selectedClass?.id||0)}`">
+          <button class="btn btn-icon cl-modal-close" @click="showMembers=false">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div class="cl-modal-title">{{ selectedClass?.name }}</div>
+          <div v-if="selectedClass?.group" class="cl-modal-group">{{ selectedClass.group }}</div>
+        </div>
+
+        <div class="cl-modal-body">
+          <!-- Creator -->
+          <div class="cl-section">
+            <div class="cl-section-label">Создатель</div>
+            <div v-if="classCreator" class="member-row">
+              <div :class="['av','av-sm',colorFor(classCreator.id)]">{{ (classCreator.full_name||classCreator.email||'?')[0].toUpperCase() }}</div>
+              <div class="member-info">
+                <div class="member-name">{{ classCreator.full_name || classCreator.email.split('@')[0] }}</div>
+                <div class="member-email">{{ classCreator.email }}</div>
+              </div>
+              <span :class="['badge', classCreator.role==='admin'?'badge-blue':'badge-gray']">{{ classCreator.role }}</span>
+            </div>
+            <div v-else style="font-size:13px;color:var(--text4);padding:8px 0">Неизвестно</div>
+          </div>
+
+          <!-- Members -->
+          <div class="cl-section">
+            <div class="cl-section-label">
+              Участники
+              <span v-if="!loadingMembers" class="cl-count-badge">{{ membersList.length }}</span>
+            </div>
+            <div v-if="loadingMembers" style="display:flex;justify-content:center;padding:20px"><div class="spinner"></div></div>
+            <div v-else-if="!membersList.length" class="cl-empty">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--border2)" stroke-width="1.5"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              <span>Участников нет</span>
+            </div>
+            <div v-else class="members-list">
+              <div v-for="m in membersList" :key="m.id" class="member-row">
+                <div :class="['av','av-sm',colorFor(m.id)]">{{ (m.full_name||m.email||'?')[0].toUpperCase() }}</div>
+                <div class="member-info">
+                  <div class="member-name">{{ m.full_name || m.email.split('@')[0] }}</div>
+                  <div class="member-email">{{ m.email }}</div>
+                </div>
+                <span :class="['badge', m.role==='teacher'?'badge-gray':'badge-gray']" style="font-size:10px">{{ m.role }}</span>
+              </div>
             </div>
           </div>
-          <div v-if="!membersList.length" style="padding:16px;text-align:center;color:var(--text4);font-size:13px">Участников нет</div>
         </div>
       </div>
     </div>
@@ -324,8 +355,13 @@ const setClassFilter = (classId: number | null) => { aiFilterClass.value = aiFil
 const switchToAiUsage = () => { tab.value = 'ai-usage'; if (!aiLogs.value.length && !aiLoading.value) loadAiUsage(1) }
 
 // ── Classes ───────────────────────────────────────────────────────────────────
+const clCovers = ['linear-gradient(135deg,#006475,#009aaf)','linear-gradient(135deg,#0c4a6e,#0369a1)','linear-gradient(135deg,#134e4a,#0d9488)','linear-gradient(135deg,#312e81,#4338ca)','linear-gradient(135deg,#1e3a5f,#2563eb)']
+const coverGrad = (id: number) => clCovers[id % clCovers.length]
+
 const classes = ref<any[]>([]); const loadingCl = ref(false)
 const showMembers = ref(false); const membersList = ref<any[]>([]); const loadingMembers = ref(false)
+const selectedClass = ref<any>(null)
+const classCreator = computed(() => selectedClass.value?.created_by ? users.value.find(u => u.id === selectedClass.value.created_by) ?? null : null)
 const creatorName = (id: number) => { const u = users.value.find(u => u.id === id); return u ? (u.full_name || u.email) : id ? '#' + id : '—' }
 
 const loadClassesFromPosts = async () => {
@@ -340,7 +376,7 @@ const loadClassesFromPosts = async () => {
       id: p.id,
       name: p.title,
       created_by: p.author_id ?? p.created_by ?? null,
-      member_count: null,
+      cover_image: body.cover_image || null,
       description: body.description || '',
       teacher: body.teacher || '',
       group: body.group || '',
@@ -348,9 +384,11 @@ const loadClassesFromPosts = async () => {
   })
 }
 
-const openMembers = async (classId: number) => {
-  showMembers.value = true; membersList.value = []; loadingMembers.value = true
-  try { membersList.value = await classesSvc.members(classId) } catch {}
+const openClass = async (cl: any) => {
+  selectedClass.value = cl
+  showMembers.value = true
+  membersList.value = []; loadingMembers.value = true
+  try { membersList.value = await classesSvc.members(cl.id) } catch {}
   finally { loadingMembers.value = false }
 }
 const switchToClasses = async () => {
@@ -437,18 +475,31 @@ onMounted(async () => {
 .ai-type-chat{background:rgba(59,130,246,.08);color:#3b82f6;border-color:rgba(59,130,246,.2)}
 .token-badge{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:var(--r-sm);background:var(--surface2);color:var(--text1);font-variant-numeric:tabular-nums}
 .ai-pagination{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:16px}
-/* Classes */
-.cl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
-.cl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:var(--sh-xs)}
-.cl-card-head{display:flex;align-items:center;gap:12px}
-.cl-avatar{width:40px;height:40px;border-radius:var(--r-md);background:var(--teal-l);color:var(--teal);font-size:16px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.cl-info{flex:1;min-width:0}
-.cl-name{font-size:14px;font-weight:600;color:var(--text1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cl-sub{font-size:12px;color:var(--text4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cl-footer{display:flex;align-items:center;justify-content:space-between}
-.cl-count{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3)}
-.members-list{display:flex;flex-direction:column;max-height:360px;overflow-y:auto;padding:0 4px}
-.member-row{display:flex;align-items:center;gap:10px;padding:10px 8px;border-bottom:1px solid var(--border)}
+/* Classes grid */
+.cl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
+.cl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;cursor:pointer;transition:all .2s;box-shadow:var(--sh-xs)}
+.cl-card:hover{transform:translateY(-3px);box-shadow:var(--sh-md);border-color:rgba(0,177,201,.25)}
+.cl-cover{height:130px;background-size:cover;background-position:center;background-repeat:no-repeat}
+.cl-body{padding:14px 16px 16px}
+.cl-name{font-size:14px;font-weight:700;color:var(--text1);margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cl-sub{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Class detail modal */
+.cl-detail-modal{max-width:460px;width:100%;padding:0;overflow:hidden}
+.cl-modal-cover{height:160px;background-size:cover;background-position:center;position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:16px 20px}
+.cl-modal-close{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.2);color:#fff;backdrop-filter:blur(4px)}
+.cl-modal-close:hover{background:rgba(0,0,0,.65)}
+.cl-modal-title{font-size:20px;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5);margin:0}
+.cl-modal-group{font-size:12px;color:rgba(255,255,255,.8);margin-top:3px;font-weight:600}
+.cl-modal-body{padding:0 20px 20px}
+.cl-section{margin-top:20px}
+.cl-section-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--text4);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.cl-count-badge{background:var(--teal);color:#fff;font-size:10px;font-weight:800;padding:1px 7px;border-radius:100px}
+.cl-empty{display:flex;flex-direction:column;align-items:center;gap:8px;padding:24px 0;color:var(--text4);font-size:13px}
+
+/* Members */
+.members-list{display:flex;flex-direction:column;max-height:280px;overflow-y:auto}
+.member-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
 .member-row:last-child{border-bottom:none}
 .member-info{flex:1;min-width:0}
 .member-name{font-size:13px;font-weight:500;color:var(--text1)}

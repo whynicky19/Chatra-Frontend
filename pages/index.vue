@@ -220,10 +220,11 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from '#app'
 import { useAuthStore } from '~/stores/auth.store'
 import { usePostsSvc } from '~/services/posts'
+import { useClassesSvc } from '~/services/classes'
 import { useToast } from '~/composables/useToast'
 import { useI18n } from '~/composables/useI18n'
 definePageMeta({ layout: 'default' })
-const auth = useAuthStore(); const postsSvc = usePostsSvc(); const toast = useToast(); const router = useRouter()
+const auth = useAuthStore(); const postsSvc = usePostsSvc(); const classesSvc = useClassesSvc(); const toast = useToast(); const router = useRouter()
 const { t, lang, setLang } = useI18n()
 const allPosts = ref<any[]>([]); const loading = ref(true); const showCreate = ref(false)
 const showJoin = ref(false); const joining = ref(false); const joinError = ref('')
@@ -348,15 +349,14 @@ const saveEditClass = async () => {
   finally { editSaving.value = false }
 }
 
-const joinClass = () => {
+const joinClass = async () => {
   joining.value = true; joinError.value = ''
   const found = foundClass.value
-  setTimeout(() => {
-    if (!found) { joinError.value = t('classes.not_found'); joining.value=false; return }
-    if (!joinedIds.value.includes(found.id)) { joinedIds.value.push(found.id); saveJoined() }
-    joining.value=false; showJoin.value=false; codeChars.value=['','','','','','']
-    toast.ok(`${t('classes.joined')} ${found.title}`)
-  }, 400)
+  if (!found) { joinError.value = t('classes.not_found'); joining.value = false; return }
+  try { await classesSvc.join(found.id) } catch {}
+  if (!joinedIds.value.includes(found.id)) { joinedIds.value.push(found.id); saveJoined() }
+  joining.value = false; showJoin.value = false; codeChars.value = ['','','','','','']
+  toast.ok(`${t('classes.joined')} ${found.title}`)
 }
 const leaveClass = (id: number) => { joinedIds.value = joinedIds.value.filter(i => i !== id); saveJoined(); toast.ok(t('classes.left_ok')) }
 const confirmDelete = (cls: any) => { deletingClass.value = cls }
@@ -372,12 +372,34 @@ const copyClassCode = (id: number) => {
   const code = codeFor(id)
   navigator.clipboard?.writeText(code).then(() => toast.ok(`Код скопирован: ${code}`)).catch(() => toast.ok(`Код: ${code}`))
 }
-const onCreated = async (cls: any) => { showCreate.value=false; await load(); if (cls?.id && !joinedIds.value.includes(cls.id)) { joinedIds.value.push(cls.id); saveJoined() } }
+const onCreated = async (cls: any) => {
+  showCreate.value = false
+  await load()
+  if (cls?.id) {
+    try { await classesSvc.join(cls.id) } catch {}
+    if (!joinedIds.value.includes(cls.id)) { joinedIds.value.push(cls.id); saveJoined() }
+  }
+}
 const load = async () => { loading.value=true; try { allPosts.value=await postsSvc.list() } catch { toast.err(t('general.error')) } finally { loading.value=false } }
-onMounted(() => { loadJoined(); load() })
+
+// Sync any locally-tracked class memberships to the backend on startup
+const syncMemberships = async (ids: number[]) => {
+  await Promise.all(ids.map(id => classesSvc.join(id).catch(() => {})))
+}
+
+onMounted(async () => {
+  loadJoined()
+  await load()
+  if (joinedIds.value.length) syncMemberships(joinedIds.value)
+})
 
 // Re-load joined IDs whenever the logged-in user changes (fixes disappearing classes after re-login)
-watch(() => auth.user?.id, (newId) => { if (newId) loadJoined() })
+watch(() => auth.user?.id, async (newId) => {
+  if (newId) {
+    loadJoined()
+    if (joinedIds.value.length) syncMemberships(joinedIds.value)
+  }
+})
 </script>
 
 <style scoped>
