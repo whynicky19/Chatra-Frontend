@@ -34,3 +34,9 @@ Thumbs.db
 
 # Nuxt prepare
 frontend_work/.nuxt
+
+.nuxt
+dist
+node_modules
+.output
+.env
