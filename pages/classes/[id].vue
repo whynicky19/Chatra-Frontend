@@ -73,6 +73,11 @@
               <button :class="['tab-btn tab-ai', { active: tab === 'ai' }]" @click="tab = 'ai'; loadAssignments()">
                 ✨ {{ t('class.ai_chat') }}
               </button>
+              <button v-if="isTeacher" :class="['tab-btn', { active: tab === 'members' }]" @click="tab = 'members'; loadMembers()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                {{ lang === 'ru' ? 'Участники' : lang === 'kk' ? 'Қатысушылар' : 'Members' }}
+                <span v-if="members.length" class="tab-num">{{ members.length }}</span>
+              </button>
               <div class="tabs-actions tabs-actions-desktop" v-if="isTeacher">
                 <button class="btn btn-white btn-sm" @click="showCreateAssignment = true">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
@@ -98,7 +103,7 @@
           </div>
 
           <!-- Рейтинг и дедлайн для студентов — только мобайл -->
-          <div v-if="!isTeacher && tab !== 'ai'" class="mobile-stats">
+          <div v-if="!isTeacher && tab !== 'ai' && tab !== 'members'" class="mobile-stats">
             <div class="ms-score">
               <div class="ms-score-top">
                 <span class="ms-label">{{ t('class.your_rating') }}</span>
@@ -282,11 +287,51 @@
               <ClassAiChat :class-name="classTitle" :class-posts="classPosts" :is-teacher="isTeacher" :class-id="classId" :assignments="assignments" />
             </template>
 
+            <!-- MEMBERS TAB -->
+            <template v-if="tab === 'members'">
+              <div class="members-tab">
+                <div v-if="loadingMembers" style="display:flex;justify-content:center;padding:40px">
+                  <div class="spinner"></div>
+                </div>
+                <div v-else>
+                  <div class="members-header">
+                    <div class="members-search-wrap">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                      <input v-model="memberSearch" class="members-search-inp" :placeholder="lang==='ru'?'Поиск участников...':lang==='kk'?'Қатысушыларды іздеу...':'Search members...'" />
+                    </div>
+                    <div class="members-count-badge">{{ filteredMembers.length }} {{ lang==='ru'?'участников':lang==='kk'?'қатысушы':'members' }}</div>
+                  </div>
+                  <div v-if="!members.length" class="members-empty">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--border2)" stroke-width="1.3"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                    <div>{{ lang==='ru'?'Нет участников':lang==='kk'?'Қатысушылар жоқ':'No members yet' }}</div>
+                  </div>
+                  <div v-else class="members-list">
+                    <div v-for="m in filteredMembers" :key="m.id" class="member-row">
+                      <div class="member-av" :style="{background: memberColor(m.id)}">
+                        <img v-if="m.avatar" :src="m.avatar" class="member-av-img" />
+                        <span v-else>{{ (m.full_name || m.email || '?')[0].toUpperCase() }}</span>
+                      </div>
+                      <div class="member-info">
+                        <div class="member-name">{{ m.full_name || m.email }}</div>
+                        <div class="member-meta">
+                          <span class="member-email">{{ m.email }}</span>
+                          <span v-if="m.group" class="member-group">{{ m.group }}</span>
+                        </div>
+                      </div>
+                      <div :class="['member-role', m.role]">
+                        {{ m.role === 'teacher' || m.role === 'admin' ? (lang==='ru'?'Учитель':lang==='kk'?'Мұғалім':'Teacher') : (lang==='ru'?'Студент':lang==='kk'?'Студент':'Student') }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
           </div>
         </div>
 
         <!-- Right sidebar -->
-        <div class="cd-sidebar" v-if="tab !== 'ai'">
+        <div class="cd-sidebar" v-if="tab !== 'ai' && tab !== 'members'">
           <!-- Score card — STUDENTS ONLY -->
           <div class="sidebar-card score-card" v-if="!isTeacher">
             <div class="score-label">{{ t('class.your_rating') }}</div>
@@ -473,6 +518,7 @@ import { useToast } from '~/composables/useToast'
 import { usePostsSvc } from '~/services/posts'
 import { useAssignmentsSvc } from '~/services/assignments'
 import { useRatingSvc } from '~/services/rating'
+import { useClassesSvc } from '~/services/classes'
 import { useAuthStore } from '~/stores/auth.store'
 import { useI18n } from '~/composables/useI18n'
 import type { Assignment, Submission } from '~/services/assignments'
@@ -483,6 +529,7 @@ const route = useRoute()
 const postsSvc = usePostsSvc()
 const assignmentsSvc = useAssignmentsSvc()
 const ratingSvc = useRatingSvc()
+const classesSvc = useClassesSvc()
 const toast = useToast()
 const auth = useAuthStore()
 const { t, lang } = useI18n()
@@ -492,7 +539,7 @@ const isTeacher = computed(() => auth.user?.role === 'teacher' || auth.user?.rol
 const uInit = computed(() => (auth.nickname || auth.user?.email || '?')[0]?.toUpperCase())
 
 const loading = ref(true)
-const tab = ref<'lectures' | 'materials' | 'assignments' | 'ai'>('lectures')
+const tab = ref<'lectures' | 'materials' | 'assignments' | 'ai' | 'members'>('lectures')
 const showCreate = ref(false)
 const showCreateAssignment = ref(false)
 const viewingPost = ref<any>(null)
@@ -500,6 +547,24 @@ const activeAssignment = ref<Assignment | null>(null)
 const allPosts = ref<any[]>([])
 const assignments = ref<Assignment[]>([])
 const mySubmissions = ref<Submission[]>([])
+
+// Members tab state
+const members = ref<any[]>([])
+const loadingMembers = ref(false)
+const memberSearch = ref('')
+const filteredMembers = computed(() => {
+  if (!memberSearch.value.trim()) return members.value
+  const q = memberSearch.value.toLowerCase()
+  return members.value.filter(m => (m.full_name || '').toLowerCase().includes(q) || (m.email || '').toLowerCase().includes(q))
+})
+const memberColors = ['#006475','#0369a1','#0d9488','#4338ca','#2563eb','#7c3aed','#db2777']
+const memberColor = (id: number) => memberColors[id % memberColors.length]
+const loadMembers = async () => {
+  if (members.value.length) return
+  loadingMembers.value = true
+  try { members.value = await classesSvc.members(classId.value) } catch { toast.err('Не удалось загрузить участников') }
+  finally { loadingMembers.value = false }
+}
 
 const editingPost = ref<any>(null)
 const editPostForm = ref({ title: '', content: '' })
@@ -990,5 +1055,27 @@ onMounted(async () => {
   .item-row{padding:12px 10px;gap:10px}
   .page-title{font-size:18px}
 }
+
+/* Members tab */
+.members-tab{padding:4px 0 80px}
+.members-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.members-search-wrap{display:flex;align-items:center;gap:8px;flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-md);padding:8px 14px}
+.members-search-inp{flex:1;background:none;border:none;outline:none;font-size:14px;color:var(--text1);font-family:inherit}
+.members-search-inp::placeholder{color:var(--text4)}
+.members-count-badge{font-size:12px;font-weight:600;color:var(--text4);white-space:nowrap}
+.members-empty{display:flex;flex-direction:column;align-items:center;gap:10px;padding:40px;text-align:center;color:var(--text4);font-size:14px}
+.members-list{display:flex;flex-direction:column;gap:6px}
+.member-row{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:12px 16px;transition:border-color .15s}
+.member-row:hover{border-color:rgba(0,177,201,.2)}
+.member-av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700;flex-shrink:0;overflow:hidden}
+.member-av-img{width:100%;height:100%;object-fit:cover}
+.member-info{flex:1;min-width:0}
+.member-name{font-size:14px;font-weight:600;color:var(--text1)}
+.member-meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:2px}
+.member-email{font-size:12px;color:var(--text4)}
+.member-group{font-size:11px;font-weight:600;background:var(--teal-l);color:var(--teal);padding:1px 7px;border-radius:100px;border:1px solid rgba(0,177,201,.2)}
+.member-role{font-size:11px;font-weight:700;padding:3px 10px;border-radius:100px;flex-shrink:0}
+.member-role.student{background:rgba(99,102,241,.1);color:#6366f1;border:1px solid rgba(99,102,241,.2)}
+.member-role.teacher,.member-role.admin{background:var(--teal-l);color:var(--teal);border:1px solid rgba(0,177,201,.2)}
 
 </style>

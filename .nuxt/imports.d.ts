@@ -37,5 +37,6 @@ export { translations, useI18n } from '../composables/useI18n';
 export { useToast } from '../composables/useToast';
 export { useAuthStore } from '../stores/auth.store';
 export { useChatsStore, Chat, Msg, ChatUser } from '../stores/chats.store';
+export { useOrgStore, applyOrgTheme, OrgType } from '../stores/org.store';
 export { useToastStore } from '../stores/toast.store';
 export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../node_modules/@pinia/nuxt/dist/runtime/composables';

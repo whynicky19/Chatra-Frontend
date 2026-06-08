@@ -84,6 +84,38 @@
             </div>
           </div>
         </div>
+
+        <!-- RAG Document Upload (teacher only) -->
+        <div v-if="isTeacher" class="sb-section">
+          <div class="sb-section-title">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Загрузить в базу знаний ИИ
+          </div>
+          <div class="rag-upload-area" @drop.prevent="onRagDrop" @dragover.prevent>
+            <label class="rag-upload-label">
+              <input ref="ragFileInput" type="file" style="display:none" accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg" multiple @change="onRagFilePick" />
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              <span>Нажмите или перетащите файл</span>
+              <span class="rag-hint">PDF, DOCX, TXT, MD, изображения</span>
+            </label>
+          </div>
+          <div v-if="ragUploading" class="rag-progress">
+            <div class="spin-xs"></div>
+            <span>Обрабатываю файл...</span>
+          </div>
+          <div v-if="ragDocs.length" class="rag-docs-list">
+            <div v-for="d in ragDocs" :key="d.id" class="rag-doc">
+              <span class="rag-doc-emoji">{{ emoji(d.filename) }}</span>
+              <div class="rag-doc-info">
+                <div class="rag-doc-name">{{ d.filename }}</div>
+                <div v-if="d.chunks_count" class="rag-doc-chunks">{{ d.chunks_count }} фрагментов</div>
+              </div>
+              <button class="rag-doc-del" @click="deleteRagDoc(d.id)" title="Удалить">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ── Messages ── -->
@@ -155,6 +187,7 @@ import { useUsersSvc } from '~/services/users'
 import { useToast } from '~/composables/useToast'
 import { useApi } from '~/services/api'
 import { useAi, incrementAiCount, AI_LIMIT } from '~/composables/useAi'
+import { useRagSvc } from '~/services/rag'
 import type { Submission } from '~/services/assignments'
 
 // ── Props ────────────────────────────────────────────────────────────────────
@@ -198,6 +231,47 @@ const loadingSet = ref<Set<string>>(new Set())
 const pendingSubs = ref<Submission[]>([])
 const gradingId = ref<number | null>(null)
 let nextId = 0
+
+// ── RAG Upload ────────────────────────────────────────────────────────────────
+const ragSvc = useRagSvc()
+const ragFileInput = ref<HTMLInputElement>()
+const ragUploading = ref(false)
+const ragDocs = ref<Array<{ id: number; filename: string; chunks_count?: number }>>([])
+
+const uploadRagFiles = async (files: File[]) => {
+  ragUploading.value = true
+  for (const file of files) {
+    try {
+      const result = await ragSvc.ingest(file)
+      ragDocs.value.unshift({ id: result.doc_id, filename: result.filename, chunks_count: result.chunks })
+      toast.ok(`Загружено: ${result.filename} (${result.chunks} фрагментов)`)
+    } catch (e: any) {
+      toast.err(e?.response?.data?.detail || `Ошибка загрузки ${file.name}`)
+    }
+  }
+  ragUploading.value = false
+}
+
+const onRagFilePick = (e: Event) => {
+  const files = Array.from((e.target as HTMLInputElement).files || [])
+  if (files.length) uploadRagFiles(files)
+  ;(e.target as HTMLInputElement).value = ''
+}
+
+const onRagDrop = (e: DragEvent) => {
+  const files = Array.from(e.dataTransfer?.files || [])
+  if (files.length) uploadRagFiles(files)
+}
+
+const deleteRagDoc = async (docId: number) => {
+  try {
+    await ragSvc.delete(docId)
+    ragDocs.value = ragDocs.value.filter(d => d.id !== docId)
+    toast.ok('Документ удалён из базы знаний')
+  } catch {
+    toast.err('Ошибка удаления')
+  }
+}
 
 // ── Session persistence ────────────────────────────────────────────────────────
 const storageKey = computed(() => `ai_chat_class_${props.classId ?? 'x'}`)
@@ -701,4 +775,20 @@ onMounted(() => {
 .spin-xs { width: 12px; height: 12px; border: 2px solid var(--border2); border-top-color: var(--teal); border-radius: 50%; animation: spin .6s linear infinite; flex-shrink: 0; }
 .spin-xs.white { border-color: rgba(255,255,255,.3); border-top-color: #fff; }
 @keyframes spin { to{transform:rotate(360deg)} }
+
+/* RAG Upload */
+.rag-upload-area { border: 1.5px dashed rgba(0,177,201,.3); border-radius: var(--r-md); transition: border-color .15s; }
+.rag-upload-area:hover { border-color: rgba(0,177,201,.6); }
+.rag-upload-label { display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 14px 10px; cursor: pointer; color: var(--text4); text-align: center; font-size: 12px; }
+.rag-upload-label svg { color: var(--teal); opacity: .7; }
+.rag-hint { font-size: 10px; color: var(--text4); opacity: .7; }
+.rag-progress { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--teal); padding: 6px 0; }
+.rag-docs-list { display: flex; flex-direction: column; gap: 4px; margin-top: 6px; }
+.rag-doc { display: flex; align-items: center; gap: 8px; background: var(--surface2); border-radius: var(--r-sm); padding: 6px 8px; }
+.rag-doc-emoji { font-size: 14px; flex-shrink: 0; }
+.rag-doc-info { flex: 1; min-width: 0; }
+.rag-doc-name { font-size: 11px; font-weight: 600; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rag-doc-chunks { font-size: 10px; color: var(--teal); }
+.rag-doc-del { background: none; border: none; cursor: pointer; color: var(--text4); padding: 2px; border-radius: 4px; display: flex; align-items: center; transition: color .15s; }
+.rag-doc-del:hover { color: var(--red); }
 </style>

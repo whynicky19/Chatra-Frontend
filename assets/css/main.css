@@ -490,3 +490,33 @@ html {
   .modal-title { font-size: 15px !important; }
   .auth-title { font-size: 18px !important; }
 }
+/* ====== SCHOOL ORG THEME (amber) ====== */
+/* Applied via JS (applyOrgTheme) and data-org attribute as fallback */
+:root[data-org="school"] {
+  --teal: #F59E0B;
+  --teal-h: #D97706;
+  --teal-d: #B45309;
+  --teal-l: rgba(245,158,11,.1);
+  --teal-m: rgba(245,158,11,.2);
+  --teal-glow: 0 0 30px rgba(245,158,11,.4),0 0 60px rgba(245,158,11,.15);
+  --purple: #F59E0B;
+  --purple-h: #D97706;
+  --purple-l: rgba(245,158,11,.1);
+  --cyan: #F59E0B;
+  --border: rgba(245,158,11,.14);
+  --border2: rgba(245,158,11,.28);
+  --sh-xs: 0 2px 8px rgba(180,83,9,.08);
+  --sh-sm: 0 4px 16px rgba(180,83,9,.1);
+  --sh-md: 0 8px 28px rgba(180,83,9,.14);
+  --msg-own-bg: linear-gradient(135deg,#F59E0B,#B45309);
+}
+html.dark:root[data-org="school"] {
+  --teal: #F59E0B;
+  --teal-h: #D97706;
+  --teal-d: #B45309;
+  --teal-l: rgba(245,158,11,.12);
+  --teal-m: rgba(245,158,11,.2);
+  --border: rgba(245,158,11,.12);
+  --border2: rgba(245,158,11,.24);
+}
+::-webkit-scrollbar-thumb { background: rgba(var(--teal-rgb, 0,177,201),.25); }

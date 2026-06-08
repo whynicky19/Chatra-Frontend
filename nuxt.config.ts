@@ -1,14 +1,14 @@
 export default defineNuxtConfig({
-  ssr: false, // SPA mode — fixes "Not authenticated" on page refresh (token only in localStorage)
+  ssr: false,
   devtools: { enabled: false },
-  compatibilityDate: '2024-04-03',
+  compatibilityDate: '2025-05-01',
   modules: ['@pinia/nuxt'],
   css: ['~/assets/css/main.css'],
   components: [{ path: '~/components', pathPrefix: false }],
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8000',
-      wsBase: process.env.NUXT_PUBLIC_WS_BASE || 'ws://localhost:8000',
+      wsBase:  process.env.NUXT_PUBLIC_WS_BASE  || 'ws://localhost:8000',
     },
   },
   app: {
@@ -24,13 +24,6 @@ export default defineNuxtConfig({
         { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
         { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/logo.png' },
         { rel: 'apple-touch-icon', sizes: '180x180', href: '/logo.png' },
-      ],
-      script: [
-        {
-          // Inline script runs before paint — eliminates dark mode flash
-          innerHTML: `(function(){try{var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.classList.add('dark');else if(t==='light')document.documentElement.classList.remove('dark');else if(window.matchMedia('(prefers-color-scheme: dark)').matches)document.documentElement.classList.add('dark');}catch(e){}})();`,
-          type: 'text/javascript',
-        },
       ],
     },
     pageTransition: { name: 'page', mode: 'out-in' },

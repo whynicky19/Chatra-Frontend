@@ -1,24 +1,28 @@
-import { navigateTo } from '#app'
 import { useAuthStore } from '~/stores/auth.store'
+import { useOrgStore, applyOrgTheme } from '~/stores/org.store'
 import { useToast } from '~/composables/useToast'
 import { useAuthSvc } from '~/services/auth'
 import { resetLogoutFlag } from '~/services/api'
 
 export const useAuth = () => {
   const auth = useAuthStore()
-  const svc = useAuthSvc()
+  const org  = useOrgStore()
+  const svc  = useAuthSvc()
   const toast = useToast()
 
   const login = async (email: string, pw: string) => {
     try {
       resetLogoutFlag()
-      const t = await svc.login(email, pw)
+      const orgType = org.orgTypeString
+      const t = await svc.login(email, pw, orgType)
       auth.setToken(t.access_token)
       if (t.refresh_token) auth.setRefreshToken(t.refresh_token)
       const u = await svc.me()
       auth.setUser(u)
 
       if (import.meta.client) {
+        applyOrgTheme(orgType as any)
+
         if (u.full_name) {
           auth.setFullname(u.full_name)
           localStorage.removeItem('_pending_fullname')
@@ -42,10 +46,16 @@ export const useAuth = () => {
     }
   }
 
-  const register = async (email: string, pw: string, role = 'employee', full_name?: string, group?: string) => {
-
+  const register = async (
+    email: string,
+    pw: string,
+    role = 'student',
+    full_name?: string,
+    group?: string
+  ) => {
     try {
-      await svc.register(email, pw, role, full_name, group)  // ← передаём group
+      const orgType = org.orgTypeString
+      await svc.register(email, pw, role, full_name, group, orgType)
       toast.ok('Аккаунт создан')
       return true
     } catch (e: any) {
@@ -59,10 +69,17 @@ export const useAuth = () => {
     try {
       const u = await svc.me()
       auth.setUser(u)
-    } catch { auth.logout() }
+    } catch {
+      auth.logout()
+    }
   }
 
-  const logout = () => { auth.logout(); navigateTo('/login') }
+  const logout = () => {
+    auth.logout()
+    if (import.meta.client) {
+      window.location.href = '/org'
+    }
+  }
 
   return { login, register, fetchMe, logout }
 }

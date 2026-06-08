@@ -31,8 +31,14 @@ export const useClassesSvc = () => {
       await api.delete(`/classes/${classId}`)
     },
     members: async (classId: number): Promise<any[]> => {
-      const { data } = await api.get(`/admin/classes/${classId}/members`)
-      return data as any[]
+      // Try the classes endpoint first, fall back to admin endpoint
+      try {
+        const { data } = await api.get(`/classes/${classId}/members`)
+        return data as any[]
+      } catch {
+        const { data } = await api.get(`/admin/classes/${classId}/members`)
+        return data as any[]
+      }
     },
   }
 }

@@ -106,9 +106,6 @@
       "vue-demi": [
         "../node_modules/nuxt/dist/app/compat/vue-demi"
       ],
-      "pinia": [
-        "../node_modules/pinia/dist/pinia"
-      ],
       "#vue-router": [
         "../node_modules/vue-router"
       ],
@@ -119,7 +116,7 @@
         "./imports"
       ],
       "#app-manifest": [
-        "./manifest/meta/dev"
+        "./manifest/meta/dev.json"
       ],
       "#components": [
         "./components"

@@ -1,5 +1,17 @@
 <template>
   <div class="auth-card anim-scale">
+    <!-- Org type badge -->
+    <div class="org-badge-row">
+      <div :class="['org-badge', org.isSchool ? 'school' : 'university']">
+        <svg v-if="org.isSchool" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        <svg v-else width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        {{ org.isSchool ? (lang==='ru'?'Школа':lang==='kk'?'Мектеп':'School') : (lang==='ru'?'Университет':lang==='kk'?'Университет':'University') }}
+      </div>
+      <button class="org-switch-btn" @click="switchOrg">
+        {{ lang==='ru'?'Сменить':'Change' }}
+      </button>
+    </div>
+
     <h2 class="auth-title">{{ t('login.welcome') }}</h2>
     <p class="auth-sub">{{ t('login.sub') }}</p>
     <form @submit.prevent="sub" class="auth-form">
@@ -34,10 +46,13 @@ import { ref } from 'vue'
 import { navigateTo } from '#app'
 import { useAuth } from '~/composables/useAuth'
 import { useI18n } from '~/composables/useI18n'
+import { useOrgStore } from '~/stores/org.store'
 definePageMeta({ layout: 'auth' })
 const { login } = useAuth()
-const { t } = useI18n()
+const { t, lang } = useI18n()
+const org = useOrgStore()
 const email = ref(''); const pw = ref(''); const show = ref(false); const loading = ref(false); const errorMsg = ref('')
+const switchOrg = () => { org.clear(); if (import.meta.client) window.location.href = '/org' }
 const sub = async () => {
   errorMsg.value = ''
   loading.value = true
@@ -65,6 +80,13 @@ const sub = async () => {
 .login-error{display:flex;align-items:center;gap:7px;padding:10px 14px;background:#fff1f1;border:1px solid #fca5a5;border-radius:var(--r-md);font-size:13px;font-weight:500;color:#dc2626;margin-bottom:6px}
 .input-err{border-color:#fca5a5!important;background:#fff8f8!important}
 .input-err:focus{border-color:#f87171!important;box-shadow:0 0 0 3px rgba(239,68,68,0.12)!important}
+/* Org badge */
+.org-badge-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.org-badge{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;letter-spacing:.05em;padding:4px 10px;border-radius:100px}
+.org-badge.university{background:rgba(0,177,201,.1);color:#007a8e;border:1px solid rgba(0,177,201,.25)}
+.org-badge.school{background:rgba(245,158,11,.1);color:#b45309;border:1px solid rgba(245,158,11,.25)}
+.org-switch-btn{font-size:11px;font-weight:600;color:#7aabb5;background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:6px;transition:color .15s}
+.org-switch-btn:hover{color:#00B1C9}
 
 @media (max-width:768px) {
   .auth-card { padding: 20px 14px 24px; border-radius: var(--r-xl); width: 100%; max-width: 100%; box-shadow: none; border: 1px solid rgba(0,177,201,0.15); }

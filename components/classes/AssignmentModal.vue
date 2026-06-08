@@ -258,6 +258,31 @@
               <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               {{ grading ? 'ИИ читает файл и проверяет...' : (activeSub.grade ? 'Перепроверить ИИ' : 'Проверить ИИ') }}
             </button>
+            <button class="btn btn-teal" @click="showManualGrade = !showManualGrade">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              {{ activeSub.grade ? 'Выставить вручную' : 'Оценить вручную' }}
+            </button>
+          </div>
+
+          <!-- Manual grade form -->
+          <div v-if="showManualGrade" class="manual-grade-form">
+            <div class="mgf-title">Ручная оценка</div>
+            <div class="mgf-score-row">
+              <label class="mgf-label">Балл (0 – {{ assignment.max_score }})</label>
+              <input v-model.number="manualScore" type="number" :min="0" :max="assignment.max_score" class="mgf-input" />
+              <div class="mgf-pct">{{ manualScore > 0 ? Math.round(manualScore / assignment.max_score * 100) + '%' : '0%' }}</div>
+            </div>
+            <div class="mgf-field">
+              <label class="mgf-label">Комментарий (необязательно)</label>
+              <textarea v-model="manualFeedback" class="mgf-textarea" rows="3" placeholder="Напишите фидбек для студента..."></textarea>
+            </div>
+            <div class="mgf-actions">
+              <button class="btn btn-ghost" @click="showManualGrade = false">Отмена</button>
+              <button class="btn btn-teal" :disabled="savingGrade || manualScore < 0" @click="saveManualGrade">
+                <div v-if="savingGrade" class="spinner" style="width:12px;height:12px;border-width:2px;border-color:rgba(255,255,255,.3);border-top-color:#fff"></div>
+                <span v-else>Сохранить оценку</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -318,7 +343,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useAssignmentsSvc } from '~/services/assignments'
 import { useUploadSvc } from '~/services/uploads'
 import { useUsersSvc } from '~/services/users'
@@ -471,6 +496,44 @@ const runAiGrade = async () => {
     toast.ok(`ИИ проверил: ${grade.score} / ${props.assignment.max_score}`)
   } catch (e: any) { toast.err(e?.response?.data?.detail || 'Ошибка ИИ-проверки') }
   finally { grading.value = false }
+}
+
+// Manual grading
+const showManualGrade = ref(false)
+const manualScore = ref(0)
+const manualFeedback = ref('')
+const savingGrade = ref(false)
+
+// Pre-fill manual score when switching to a submission that already has a grade
+watch(activeSub, (sub) => {
+  showManualGrade.value = false
+  if (sub?.grade) {
+    manualScore.value = sub.grade.score
+    manualFeedback.value = sub.grade.feedback || ''
+  } else {
+    manualScore.value = 0
+    manualFeedback.value = ''
+  }
+})
+
+const saveManualGrade = async () => {
+  if (!activeSub.value || savingGrade.value) return
+  savingGrade.value = true
+  try {
+    const grade = await svc.saveGrade(activeSub.value.id, {
+      score: manualScore.value,
+      feedback: manualFeedback.value || undefined,
+      graded_by: 'teacher'
+    })
+    activeSub.value = { ...activeSub.value, grade, status: 'graded' }
+    const idx = submissions.value.findIndex(s => s.id === activeSub.value!.id)
+    if (idx !== -1) submissions.value[idx] = { ...submissions.value[idx], grade, status: 'graded' }
+    toast.ok(`Оценка сохранена: ${grade.score} / ${props.assignment.max_score}`)
+    showManualGrade.value = false
+    manualScore.value = 0
+    manualFeedback.value = ''
+  } catch (e: any) { toast.err(e?.response?.data?.detail || 'Ошибка сохранения оценки') }
+  finally { savingGrade.value = false }
 }
 
 const runBulkAiGrade = async () => {
@@ -748,4 +811,17 @@ onMounted(async () => {
   .am-body { padding: 12px 12px 80px; }
   .subs-stats { gap: 6px; }
 }
+
+/* Manual grade form */
+.manual-grade-form { margin-top: 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+.mgf-title { font-size: 13px; font-weight: 700; color: var(--teal); letter-spacing: .05em; }
+.mgf-label { font-size: 11px; font-weight: 700; color: var(--text4); letter-spacing: .06em; display: block; margin-bottom: 6px; }
+.mgf-score-row { display: flex; align-items: center; gap: 10px; }
+.mgf-input { width: 80px; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--text1); font-size: 18px; font-weight: 700; text-align: center; font-family: inherit; transition: border-color .15s; }
+.mgf-input:focus { border-color: var(--teal); outline: none; }
+.mgf-pct { font-size: 14px; font-weight: 600; color: var(--text4); }
+.mgf-textarea { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--r-md); background: var(--surface); color: var(--text1); font-size: 13px; font-family: inherit; resize: vertical; transition: border-color .15s; box-sizing: border-box; }
+.mgf-textarea:focus { border-color: var(--teal); outline: none; }
+.mgf-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.grade-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
